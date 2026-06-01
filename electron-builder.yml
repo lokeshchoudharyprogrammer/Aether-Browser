@@ -1,0 +1,54 @@
+appId: com.aetherbrowser.app
+productName: Aether Browser
+copyright: Copyright © 2025 Aether Browser
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - resources/**
+win:
+  executableName: AetherBrowser
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
+  icon: build/icon.ico
+nsis:
+  artifactName: AetherBrowser-${version}-Setup.${ext}
+  shortcutName: Aether Browser
+  uninstallDisplayName: Aether Browser
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+mac:
+  entitlementsInherit: build/entitlements.mac.plist
+  icon: build/icon.icns
+  extendInfo:
+    - NSCameraUsageDescription: Application requests access to the device's camera.
+    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  notarize: false
+dmg:
+  artifactName: AetherBrowser-${version}.${ext}
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: build/icon.png
+  maintainer: aetherbrowser@example.com
+  category: Network
+appImage:
+  artifactName: AetherBrowser-${version}.${ext}
+npmRebuild: false
+publish:
+  provider: generic
+  url: https://example.com/auto-updates

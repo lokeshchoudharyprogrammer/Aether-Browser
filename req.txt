@@ -1,0 +1,583 @@
+# Project Atlas Browser
+
+## Open Source Privacy-First Chromium Browser
+
+You are a principal software architect, Chromium engineer, operating system engineer, browser engineer, security researcher, UI/UX expert, and product designer.
+
+Design and build a world-class open-source browser based on Chromium.
+
+This project is NOT an AI browser.
+
+AI features must NOT be included in the initial architecture.
+
+The goal is to create a browser that is faster, more customizable, more secure, more private, and more user-friendly than Chrome while remaining fully compatible with Chromium and Chrome extensions.
+
+The browser should be capable of competing with Chrome, Brave, Edge, Opera, Vivaldi, and Arc.
+
+---
+
+# Vision
+
+Build the most customizable browser ever created.
+
+The browser should feel like:
+
+* Chrome compatibility
+* Brave privacy
+* Arc workspace organization
+* Vivaldi customization
+* Enterprise-grade security
+
+Everything must be open source.
+
+---
+
+# Core Principles
+
+1. Privacy First
+2. Open Source
+3. Security First
+4. Fast Performance
+5. Multi User Support
+6. Extreme Customization
+7. Developer Friendly
+8. Community Driven
+9. Cross Platform
+10. Long Term Sustainability
+
+---
+
+# Browser Foundation
+
+Base Technology:
+
+Chromium Latest Stable
+
+Platforms:
+
+* Windows
+* macOS
+* Linux
+
+Future:
+
+* Android
+* iOS
+
+Requirements:
+
+* Chrome Extension Support
+* Chrome Web Store Support
+* Chromium Rendering Engine
+* Chromium Security Updates
+* Modern Web Standards
+* Backward Compatibility
+
+---
+
+# Multi User Browser System
+
+This is one of the main differentiators.
+
+Unlike Chrome, multiple users should securely share the same browser installation.
+
+---
+
+## User Profiles
+
+Support unlimited profiles.
+
+Examples:
+
+* Personal
+* Work
+* Study
+* Family
+* Guest
+* Kids
+
+Each profile must have:
+
+* Independent history
+* Independent bookmarks
+* Independent downloads
+* Independent passwords
+* Independent cookies
+* Independent settings
+* Independent extensions
+* Independent themes
+
+Profiles must be completely isolated.
+
+---
+
+# Profile Lock System
+
+Every profile can be protected by:
+
+* Password
+* PIN
+* Biometric Authentication
+* Security Questions
+
+Examples:
+
+Profile:
+Work
+
+Password:
+
+---
+
+Profile:
+Personal
+
+Password:
+
+---
+
+Users cannot access another profile without authentication.
+
+---
+
+# Family Browser Mode
+
+Support shared computers.
+
+Examples:
+
+Mother
+Father
+Child
+Guest
+
+Each user gets:
+
+* Separate environment
+* Separate bookmarks
+* Separate browsing history
+* Separate saved passwords
+
+Like operating system accounts but inside the browser.
+
+---
+
+# Guest Mode
+
+Temporary profile.
+
+Features:
+
+* No data persistence
+* Auto cleanup
+* Secure isolation
+* Automatic deletion on exit
+
+---
+
+# Privacy System
+
+Privacy must be a first-class feature.
+
+---
+
+## Tracking Protection
+
+Block:
+
+* Third-party trackers
+* Tracking pixels
+* Browser fingerprinting
+* Cross-site tracking
+* Cookie abuse
+
+---
+
+## Private Browsing
+
+Features:
+
+* No history
+* No cookies
+* No cache
+* No persistence
+
+---
+
+## Privacy Dashboard
+
+Display:
+
+* Ads blocked
+* Trackers blocked
+* Bandwidth saved
+* Privacy score
+
+---
+
+# Ad Blocking System
+
+Built-in ad blocker.
+
+No extensions required.
+
+Features:
+
+* YouTube ads
+* Banner ads
+* Popups
+* Video ads
+* Tracking scripts
+
+Support:
+
+* EasyList
+* EasyPrivacy
+* Custom Lists
+
+---
+
+## Site Rules
+
+Users can:
+
+Allow Ads
+
+Block Ads
+
+Custom Rules
+
+Per Website
+
+Examples:
+
+youtube.com
+
+Ads: Block
+
+github.com
+
+Ads: Allow
+
+---
+
+# Workspace System
+
+Workspaces behave like browser desktops.
+
+Examples:
+
+Work
+
+Study
+
+Development
+
+Research
+
+Personal
+
+Each workspace stores:
+
+* Tabs
+* Pinned Tabs
+* Bookmarks
+* Sessions
+
+Users can instantly switch between workspaces.
+
+---
+
+# Session Management
+
+Save entire browser sessions.
+
+Examples:
+
+React Native Learning
+
+Contains:
+
+* Documentation
+* GitHub
+* Stack Overflow
+
+Startup Research
+
+Contains:
+
+* Articles
+* Notes
+* Market Research
+
+Restore with one click.
+
+---
+
+# Vertical Tabs
+
+Support:
+
+* Traditional Tabs
+* Vertical Tabs
+
+User chooses layout.
+
+---
+
+# Sidebar System
+
+Fully customizable.
+
+Allow:
+
+* Bookmarks
+* Downloads
+* History
+* Notes
+* Workspaces
+
+Drag and drop configuration.
+
+---
+
+# Built-in Notes
+
+Users can create notes without extensions.
+
+Features:
+
+* Markdown
+* Folders
+* Search
+* Sync Ready
+
+---
+
+# Reading Mode
+
+Transform websites into:
+
+* Clean articles
+* No ads
+* No distractions
+
+Support:
+
+* Dark mode
+* Font customization
+* Offline reading
+
+---
+
+# Download Manager
+
+Advanced download manager.
+
+Features:
+
+* Pause
+* Resume
+* Categories
+* Speed Monitoring
+
+---
+
+# Theme Engine
+
+Support:
+
+* Light
+* Dark
+* AMOLED
+* Custom Themes
+
+Users can create themes.
+
+Community theme marketplace.
+
+---
+
+# Security Architecture
+
+Enterprise-grade security.
+
+Requirements:
+
+* Sandboxed Processes
+* Encrypted Password Storage
+* Profile Isolation
+* Secure Local Storage
+* Crash Recovery
+* Session Recovery
+
+Encryption:
+
+AES-256
+
+---
+
+# Password Manager
+
+Built-in password manager.
+
+Features:
+
+* Encryption
+* Password Generation
+* Password Health Checks
+
+Optional Master Password.
+
+---
+
+# Extension System
+
+Support:
+
+* Chrome Extensions
+* Chromium Extensions
+
+Allow:
+
+* Enable
+* Disable
+* Permission Control
+
+---
+
+# Performance Goals
+
+Startup:
+
+< 2 Seconds
+
+RAM Usage:
+
+Lower than Chrome
+
+Tabs:
+
+100+ Open Tabs
+
+Support:
+
+* Lazy Loading
+* Sleeping Tabs
+* Memory Optimization
+
+---
+
+# Developer Features
+
+Built-in:
+
+* JSON Viewer
+* Source Viewer
+* Enhanced Downloads
+* Advanced DevTools Integration
+
+No AI features.
+
+Developer tools must remain lightweight.
+
+---
+
+# Open Source Requirements
+
+License:
+
+MIT
+
+Requirements:
+
+* Public GitHub Repository
+* Documentation
+* Contributor Guide
+* Architecture Guide
+* Issue Templates
+* Pull Request Templates
+
+---
+
+# Plugin Architecture
+
+Everything should be modular.
+
+Modules:
+
+* Ad Blocker
+* Theme Engine
+* Workspace Engine
+* Notes Engine
+* Profile Engine
+
+Independent packages.
+
+---
+
+# Recommended Technology Stack
+
+Browser Core:
+Chromium
+
+Desktop:
+Electron
+
+Frontend:
+React
+
+Language:
+TypeScript
+
+Database:
+SQLite
+
+State Management:
+Zustand
+
+Storage:
+Encrypted Local Storage
+
+Build System:
+Vite
+
+CI/CD:
+GitHub Actions
+
+Monitoring:
+Sentry
+
+---
+
+# Deliverables
+
+Generate:
+
+1. Complete System Design
+2. High-Level Architecture
+3. Chromium Integration Strategy
+4. Database Schema
+5. Multi-Profile Architecture
+6. Password Lock Architecture
+7. Workspace Architecture
+8. Session Management Architecture
+9. Ad Blocker Architecture
+10. Privacy Architecture
+11. Security Architecture
+12. Theme Engine Design
+13. Plugin Architecture
+14. Folder Structure
+15. Desktop Application Architecture
+16. Cross-Platform Strategy
+17. MVP Roadmap
+18. Production Roadmap
+19. Open Source Roadmap
+20. Scaling Strategy
+21. Contributor Guidelines
+22. Technical Documentation
+23. Security Review Checklist
+24. Browser Store Architecture
+25. Future AI Integration Plan (Architecture Only, No Implementation)
+
+Build this as a real-world browser product intended to reach millions of users worldwide.
