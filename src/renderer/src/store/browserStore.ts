@@ -6,6 +6,7 @@ export interface Tab {
   workspaceId: string
   title: string
   url: string
+  favicon?: string
   isPinned: boolean
   active: boolean
 }
@@ -91,6 +92,7 @@ interface BrowserStore {
   searchQuery: string
   adBlockedCount: number
   downloads: DownloadItem[]
+  tabZoom: Record<string, number>
 
   // Custom View overlays
   readingModeActive: boolean
@@ -143,7 +145,9 @@ interface BrowserStore {
   addTab: (title: string, url: string) => void
   closeTab: (tabId: string) => void
   updateTabUrl: (tabId: string, url: string, title?: string) => void
+  updateTabFavicon: (tabId: string, favicon: string) => void
   togglePinTab: (tabId: string) => void
+  setTabZoom: (tabId: string, factor: number) => void
 
   // Bookmark CRUD
   addBookmark: (title: string, url: string) => void
@@ -185,6 +189,7 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
   searchQuery: '',
   adBlockedCount: 0,
   downloads: [],
+  tabZoom: {},
   readingModeActive: false,
   readingModeContent: null,
   viewSourceActive: false,
@@ -195,9 +200,30 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
     const db = await window.api.getDb()
     set({ db })
 
-    // Auto-select first unlocked profile if any
+    // Restore last session: prefer first unlocked profile, restoring its last workspace/tab
     const firstUnlocked = db.profiles.find((p: Profile) => p.lockType === 'none')
     if (firstUnlocked) {
+      // Restore the profile's saved activeWorkspaceId
+      const savedWorkspaceId = firstUnlocked.activeWorkspaceId
+      const workspaceExists = db.workspaces.some(
+        (w: Workspace) => w.id === savedWorkspaceId && w.profileId === firstUnlocked.id
+      )
+      const activeWId = workspaceExists
+        ? savedWorkspaceId
+        : db.workspaces.find((w: Workspace) => w.profileId === firstUnlocked.id)?.id
+
+      if (activeWId) {
+        const workspaceTabs = db.tabs.filter((t: Tab) => t.workspaceId === activeWId)
+        const activeTab = workspaceTabs.find((t: Tab) => t.active) || workspaceTabs[0]
+        set({
+          activeProfileId: firstUnlocked.id,
+          activeWorkspaceId: activeWId,
+          activeTabId: activeTab?.id || null,
+          adBlockedCount: db.stats?.adsBlockedPerProfile?.[firstUnlocked.id] || 0,
+          db: { ...db }
+        })
+        return
+      }
       get().setActiveProfile(firstUnlocked.id)
     }
   },
@@ -571,6 +597,21 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
       set({ db: { ...db } })
       get().syncDb()
     }
+  },
+
+  updateTabFavicon: (tabId, favicon) => {
+    const { db } = get()
+    if (!db) return
+    const tab = db.tabs.find((t: Tab) => t.id === tabId)
+    if (tab) {
+      tab.favicon = favicon
+      set({ db: { ...db } })
+    }
+  },
+
+  setTabZoom: (tabId, factor) => {
+    const { tabZoom } = get()
+    set({ tabZoom: { ...tabZoom, [tabId]: factor } })
   },
 
   togglePinTab: (tabId) => {

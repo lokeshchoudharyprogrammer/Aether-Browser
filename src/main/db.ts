@@ -1,10 +1,24 @@
 import { app } from 'electron'
 import { join } from 'path'
 import { writeFileSync, readFileSync, existsSync } from 'fs'
+import { randomBytes } from 'crypto'
 import CryptoJS from 'crypto-js'
 
-const DB_FILE = join(app.getPath('userData'), 'kitkat_browser_db.json')
-const MASTER_KEY = 'kitkat-browser-secure-key-2026' // System seed
+const DB_FILE = join(app.getPath('userData'), 'aether_browser_db.json')
+const KEY_FILE = join(app.getPath('userData'), '.aether_key')
+
+// Generate or load a persistent machine-unique encryption key
+function getMasterKey(): string {
+  if (existsSync(KEY_FILE)) {
+    return readFileSync(KEY_FILE, 'utf-8').trim()
+  }
+  // First launch: generate a random 32-byte hex key
+  const key = randomBytes(32).toString('hex')
+  writeFileSync(KEY_FILE, key, { encoding: 'utf-8', mode: 0o600 })
+  return key
+}
+
+const MASTER_KEY = getMasterKey()
 
 export interface Profile {
   id: string

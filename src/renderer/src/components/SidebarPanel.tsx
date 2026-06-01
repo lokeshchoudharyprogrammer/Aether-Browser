@@ -815,79 +815,95 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({ currentTabUrl, curre
                   Vault is empty.
                 </div>
               ) : (
-                profileCredentials.map((c: any) => (
-                  <div
-                    key={c.id}
-                    style={{
-                      background: 'var(--bg-tertiary)',
-                      padding: 12,
-                      borderRadius: 8,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 6
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>
+              profileCredentials.map((c: any) => (
+                <div
+                  key={c.id}
+                  style={{
+                    background: 'var(--bg-tertiary)',
+                    padding: 14,
+                    borderRadius: 10,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
+                  {/* Header row */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>
                         {c.url}
-                      </span>
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
+                        👤 {c.username}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4 }}>
                       <button
                         className="nav-circle-btn"
-                        style={{ color: '#ef233c', width: 24, height: 24 }}
+                        style={{ width: 26, height: 26 }}
+                        title="Open site in new tab"
+                        onClick={() => store.addTab(c.url, c.url.startsWith('http') ? c.url : `https://${c.url}`)}
+                      >
+                        <span style={{ fontSize: 11 }}>↗</span>
+                      </button>
+                      <button
+                        className="nav-circle-btn"
+                        style={{ color: '#ef233c', width: 26, height: 26 }}
+                        title="Delete credential"
                         onClick={() => deleteCredential(c.id)}
                       >
                         <Trash2 size={12} />
                       </button>
                     </div>
+                  </div>
 
-                    <div
+                  {/* Password row */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      background: 'var(--bg-secondary)',
+                      padding: '6px 10px',
+                      borderRadius: 6
+                    }}
+                  >
+                    <span
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        fontSize: 12,
-                        color: 'var(--text-secondary)'
+                        flex: 1,
+                        fontFamily: decryptedPasswords[c.id] ? 'var(--font-mono)' : 'inherit',
+                        fontSize: 13,
+                        letterSpacing: decryptedPasswords[c.id] ? 0 : 2,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      <span>User: {c.username}</span>
-                    </div>
-
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        background: 'var(--bg-secondary)',
-                        padding: '6px 8px',
-                        borderRadius: 4
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: varKey(decryptedPasswords[c.id])
-                            ? 'var(--font-mono)'
-                            : 'inherit',
-                          fontSize: 13
-                        }}
-                      >
-                        {decryptedPasswords[c.id] ? decryptedPasswords[c.id] : '••••••••••••'}
-                      </span>
+                      {decryptedPasswords[c.id] ? decryptedPasswords[c.id] : '••••••••••••'}
+                    </span>
+                    {decryptedPasswords[c.id] && (
                       <button
                         className="nav-circle-btn"
-                        style={{ width: 20, height: 20 }}
-                        onClick={() => handleRevealPassword(c.id)}
+                        style={{ width: 22, height: 22 }}
+                        title="Copy password"
+                        onClick={() => navigator.clipboard.writeText(decryptedPasswords[c.id])}
                       >
-                        {decryptedPasswords[c.id] ? <EyeOff size={12} /> : <Eye size={12} />}
+                        <span style={{ fontSize: 10 }}>📋</span>
                       </button>
-                    </div>
+                    )}
+                    <button
+                      className="nav-circle-btn"
+                      style={{ width: 22, height: 22 }}
+                      title={decryptedPasswords[c.id] ? 'Hide password' : 'Reveal password'}
+                      onClick={() => handleRevealPassword(c.id)}
+                    >
+                      {decryptedPasswords[c.id] ? <EyeOff size={12} /> : <Eye size={12} />}
+                    </button>
                   </div>
-                ))
-              )}
+                </div>
+              ))
+            )}
             </div>
           </div>
         )}
@@ -1333,6 +1349,4 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({ currentTabUrl, curre
   )
 }
 
-function varKey(val: any) {
-  return typeof val === 'string'
-}
+

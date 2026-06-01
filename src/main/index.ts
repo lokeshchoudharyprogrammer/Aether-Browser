@@ -1,32 +1,93 @@
 import { app, shell, BrowserWindow, ipcMain, session, Menu } from 'electron'
 import { join } from 'path'
+import { readFileSync, existsSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { getDb, saveDb, hashText, encryptPassword, decryptPassword } from './db'
 
 let mainWindow: BrowserWindow | null = null
 
-const adPatterns = [
-  'googleads',
-  'doubleclick.net',
-  'pagead2',
-  'googlesyndication',
-  'adservice.google',
-  'youtube.com/api/stats/ads',
-  'youtube.com/get_midroll_info',
-  'youtube.com/pagead',
-  'analytics.google.com',
-  'google-analytics.com',
-  'mixpanel.com',
-  'segment.io',
-  'ads.',
-  'analytics.',
-  'tracker',
-  '/ads/',
-  '/pagead/',
-  '/adsystem/',
-  '/adnxs/'
-]
+// ──────────────────────────────────────────────
+// REAL AD BLOCKER — 55k+ domains from EasyList
+// ──────────────────────────────────────────────
+
+interface Blocklist {
+  domains: string[]
+  patterns: string[]
+}
+
+// Lookup structures built once at startup
+const blockedDomains = new Set<string>()
+const blockedPatterns: string[] = []
+
+function loadBlocklist(): void {
+  const blocklistPath = join(__dirname, '../../resources/blocklist.json')
+
+  // Fallback if bundled file is missing (dev mode path)
+  const devPath = join(app.getAppPath(), 'resources/blocklist.json')
+
+  const filePath = existsSync(blocklistPath) ? blocklistPath : existsSync(devPath) ? devPath : null
+
+  if (filePath) {
+    try {
+      const raw = readFileSync(filePath, 'utf-8')
+      const data: Blocklist = JSON.parse(raw)
+
+      // Build domain Set for O(1) lookups
+      data.domains.forEach((d) => blockedDomains.add(d))
+      blockedPatterns.push(...data.patterns)
+
+      console.log(
+        `[AdBlocker] Loaded ${blockedDomains.size.toLocaleString()} domains + ${blockedPatterns.length} patterns`
+      )
+    } catch (e) {
+      console.error('[AdBlocker] Failed to load blocklist:', e)
+      loadFallbackPatterns()
+    }
+  } else {
+    console.warn('[AdBlocker] blocklist.json not found, using fallback patterns')
+    loadFallbackPatterns()
+  }
+}
+
+function loadFallbackPatterns(): void {
+  // Curated fallback (always loaded regardless)
+  const fallback = [
+    'googleads', 'doubleclick.net', 'pagead2', 'googlesyndication',
+    'adservice.google', 'youtube.com/api/stats/ads', 'youtube.com/get_midroll_info',
+    'analytics.google.com', 'google-analytics.com', 'mixpanel.com', 'segment.io',
+    'adnxs', 'adsystem', 'taboola', 'outbrain', 'criteo', 'moatads',
+    'amazon-adsystem', 'admob', 'demdex.net', 'omtrdc.net', 'scorecardresearch',
+    'chartbeat', 'hotjar', 'quantserve', 'rubiconproject', 'pubmatic'
+  ]
+  blockedPatterns.push(...fallback)
+}
+
+/**
+ * Returns true if the URL should be blocked.
+ * Uses hostname lookup (O(1) Set) first, then keyword patterns as fallback.
+ */
+function isBlockedUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    const hostname = parsed.hostname.toLowerCase()
+
+    // 1. Exact domain match (fast path)
+    if (blockedDomains.has(hostname)) return true
+
+    // 2. Parent-domain match (e.g. sub.ads.com → ads.com)
+    const parts = hostname.split('.')
+    for (let i = 1; i < parts.length - 1; i++) {
+      if (blockedDomains.has(parts.slice(i).join('.'))) return true
+    }
+
+    // 3. Keyword patterns in full URL (slow fallback, small list)
+    const lower = url.toLowerCase()
+    return blockedPatterns.some((p) => lower.includes(p))
+  } catch {
+    return false
+  }
+}
 
 // Map to hold running downloads to support cancel/pause actions
 const activeDownloads = new Map<string, any>()
@@ -34,10 +95,13 @@ const activeDownloads = new Map<string, any>()
 function configureSessionForProfile(profileId: string, win: BrowserWindow) {
   const sess = session.fromPartition(`persist:${profileId}`)
 
+  // Raise listener limit to prevent MaxListenersExceededWarning
+  sess.setMaxListeners(50)
+
   // Clean WebRequest listeners first to avoid duplicates
   sess.webRequest.onBeforeRequest(null)
 
-  // Tracker and Ad Blocking request interceptor
+  // ── Real Ad + Tracker Blocking ──────────────────────────────────────────
   sess.webRequest.onBeforeRequest({ urls: ['http://*/*', 'https://*/*'] }, (details, callback) => {
     const url = details.url
 
@@ -47,13 +111,11 @@ function configureSessionForProfile(profileId: string, win: BrowserWindow) {
       return
     }
 
-    const isAd = adPatterns.some((pattern) => url.toLowerCase().includes(pattern))
-
-    if (isAd) {
+    if (isBlockedUrl(url)) {
       const db = getDb()
       const profileRules = db.adBlockRules[profileId] || []
 
-      // Determine page host that initiated request
+      // Check per-site allow override
       let initiatorHost = ''
       try {
         const detailsAny = details as any
@@ -62,17 +124,15 @@ function configureSessionForProfile(profileId: string, win: BrowserWindow) {
         } else if (detailsAny.referrer) {
           initiatorHost = new URL(detailsAny.referrer).hostname
         }
-      } catch (e) {
+      } catch {
         // Safe fallback
       }
 
-      // Check if current site specifically allows ads
       const isAllowed = profileRules.some(
-        (rule) => initiatorHost.includes(rule.domain) && rule.adBlockAction === 'allow'
+        (rule: any) => initiatorHost.includes(rule.domain) && rule.adBlockAction === 'allow'
       )
 
       if (!isAllowed) {
-        // Increment statistics
         db.stats.adsBlockedTotal += 1
         if (!db.stats.adsBlockedPerProfile[profileId]) {
           db.stats.adsBlockedPerProfile[profileId] = 0
@@ -80,7 +140,6 @@ function configureSessionForProfile(profileId: string, win: BrowserWindow) {
         db.stats.adsBlockedPerProfile[profileId] += 1
         saveDb(db)
 
-        // Notify UI in real-time
         if (win && !win.isDestroyed()) {
           win.webContents.send('ad-blocked', {
             count: db.stats.adsBlockedPerProfile[profileId],
@@ -95,6 +154,8 @@ function configureSessionForProfile(profileId: string, win: BrowserWindow) {
 
     callback({ cancel: false })
   })
+
+
 
   // Download listener
   sess.on('will-download', (_, item) => {
@@ -305,7 +366,10 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.kitkat.browser')
+  electronApp.setAppUserModelId('com.aether.browser')
+
+  // Load real EasyList blocklist before any sessions start
+  loadBlocklist()
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

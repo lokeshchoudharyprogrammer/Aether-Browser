@@ -33,6 +33,7 @@ function App(): React.JSX.Element {
     activeWorkspaceId,
     activeTabId,
     activeSidebarTab,
+    tabZoom,
     setSidebarTab,
     setActiveProfile,
     setActiveWorkspace,
@@ -40,6 +41,8 @@ function App(): React.JSX.Element {
     addTab,
     closeTab,
     updateTabUrl,
+    updateTabFavicon,
+    setTabZoom,
     addHistory,
     updateDownload
   } = store
@@ -47,6 +50,11 @@ function App(): React.JSX.Element {
   const [addressInput, setAddressInput] = useState('')
   const [tabLayout, setTabLayout] = useState<'horizontal' | 'vertical'>('horizontal')
   const [loadedTabIds, setLoadedTabIds] = useState<string[]>([])
+
+  // Find in Page state
+  const [showFindBar, setShowFindBar] = useState(false)
+  const [findQuery, setFindQuery] = useState('')
+  const [findInfo, setFindInfo] = useState('')
 
   // Custom views states
   const [sourceCode, setSourceCode] = useState('')
@@ -214,6 +222,68 @@ function App(): React.JSX.Element {
         }
         return
       }
+      // Zoom: Cmd+= or Cmd++ (zoom in)
+      if (isMod && !e.shiftKey && (e.key === '=' || e.key === '+')) {
+        e.preventDefault()
+        if (activeTabId) {
+          const current = tabZoom[activeTabId] ?? 1
+          const next = Math.min(3, Math.round((current + 0.1) * 10) / 10)
+          setTabZoom(activeTabId, next)
+          const webview = webviewRefs.current[activeTabId]
+          if (webview) webview.setZoomFactor(next)
+        }
+        return
+      }
+
+      // Zoom: Cmd+- (zoom out)
+      if (isMod && e.key === '-') {
+        e.preventDefault()
+        if (activeTabId) {
+          const current = tabZoom[activeTabId] ?? 1
+          const next = Math.max(0.3, Math.round((current - 0.1) * 10) / 10)
+          setTabZoom(activeTabId, next)
+          const webview = webviewRefs.current[activeTabId]
+          if (webview) webview.setZoomFactor(next)
+        }
+        return
+      }
+
+      // Zoom: Cmd+0 (reset)
+      if (isMod && e.key === '0') {
+        e.preventDefault()
+        if (activeTabId) {
+          setTabZoom(activeTabId, 1)
+          const webview = webviewRefs.current[activeTabId]
+          if (webview) webview.setZoomFactor(1)
+        }
+        return
+      }
+
+      // Find in Page: Cmd+F
+      if (isMod && e.key.toLowerCase() === 'f') {
+        e.preventDefault()
+        setShowFindBar((prev) => !prev)
+        if (!showFindBar) {
+          setTimeout(() => document.getElementById('find-bar-input')?.focus(), 60)
+        } else {
+          const webview = webviewRefs.current[activeTabId || '']
+          if (webview) webview.stopFindInPage('clearSelection')
+          setFindQuery('')
+          setFindInfo('')
+        }
+        return
+      }
+
+      // Escape closes find bar
+      if (e.key === 'Escape' && showFindBar) {
+        e.preventDefault()
+        setShowFindBar(false)
+        const webview = webviewRefs.current[activeTabId || '']
+        if (webview) webview.stopFindInPage('clearSelection')
+        setFindQuery('')
+        setFindInfo('')
+        return
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -232,12 +302,15 @@ function App(): React.JSX.Element {
     activeWorkspaceId,
     activeTabId,
     activeSidebarTab,
+    showFindBar,
+    tabZoom,
     db,
     setActiveProfile,
     setSidebarTab,
     addTab,
     closeTab,
-    setActiveWorkspace
+    setActiveWorkspace,
+    setTabZoom
   ])
 
   if (!db) {
@@ -270,7 +343,15 @@ function App(): React.JSX.Element {
 
   const themeClass = activeProfile ? `theme-${activeProfile.themeId}` : 'theme-dark'
 
-  // Navigation handlers
+  // Sort: pinned tabs first
+  const sortedWorkspaceTabs = [
+    ...workspaceTabs.filter((t: any) => t.isPinned),
+    ...workspaceTabs.filter((t: any) => !t.isPinned)
+  ]
+
+  // Current zoom for active tab
+  const currentZoom = activeTabId ? (tabZoom[activeTabId] ?? 1) : 1
+  const zoomPct = Math.round(currentZoom * 100)
   const handleGoBack = () => {
     const webview = webviewRefs.current[activeTabId || '']
     if (webview && webview.canGoBack()) {
@@ -332,6 +413,28 @@ function App(): React.JSX.Element {
         if (id === activeTabId) {
           setAddressInput(url)
         }
+
+        // Apply saved zoom
+        const zoom = useBrowserStore.getState().tabZoom[id]
+        if (zoom && zoom !== 1) webview.setZoomFactor(zoom)
+
+        // Extract favicon
+        webview
+          .executeJavaScript(
+            `(function() {
+              const icons = [
+                document.querySelector('link[rel="icon"]'),
+                document.querySelector('link[rel="shortcut icon"]'),
+                document.querySelector('link[rel="apple-touch-icon"]')
+              ].filter(Boolean);
+              if (icons.length > 0) return icons[0].href;
+              return window.location.origin + '/favicon.ico';
+            })()`
+          )
+          .then((faviconUrl: string) => {
+            if (faviconUrl) updateTabFavicon(id, faviconUrl)
+          })
+          .catch(() => {})
 
         // Inject cosmetic ad blocker and YouTube skipper
         webview
@@ -780,11 +883,40 @@ function App(): React.JSX.Element {
                   padding: '2px 4px',
                   background: 'rgba(46, 196, 182, 0.15)',
                   borderRadius: 3,
-                  fontWeight: 700
+                  fontWeight: 700,
+                  flexShrink: 0
                 }}
               >
                 SSL
               </span>
+            )}
+            {/* Zoom level badge */}
+            {currentZoom !== 1 && (
+              <button
+                type="button"
+                title="Reset zoom (Cmd+0)"
+                onClick={() => {
+                  if (activeTabId) {
+                    setTabZoom(activeTabId, 1)
+                    const webview = webviewRefs.current[activeTabId]
+                    if (webview) webview.setZoomFactor(1)
+                  }
+                }}
+                style={{
+                  fontSize: 10,
+                  color: 'var(--bg-accent)',
+                  padding: '2px 6px',
+                  background: 'rgba(131,56,236,0.15)',
+                  borderRadius: 3,
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  fontFamily: 'var(--font-mono)'
+                }}
+              >
+                {zoomPct}%
+              </button>
             )}
           </form>
 
@@ -810,7 +942,86 @@ function App(): React.JSX.Element {
 
           <div style={{ width: 1, height: 20, backgroundColor: 'var(--border-color)' }} />
 
+          {/* Find in Page Bar */}
+          {showFindBar && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '6px 12px',
+                background: 'var(--bg-secondary)',
+                borderBottom: '1px solid var(--border-color)'
+              }}
+            >
+              <input
+                id="find-bar-input"
+                type="text"
+                placeholder="Find in page…"
+                className="address-input"
+                style={{ flex: 1, height: 30, fontSize: 13, maxWidth: 320 }}
+                value={findQuery}
+                onChange={(e) => {
+                  const q = e.target.value
+                  setFindQuery(q)
+                  const webview = webviewRefs.current[activeTabId || '']
+                  if (webview && q) {
+                    webview.findInPage(q, { findNext: false })
+                    webview.addEventListener('found-in-page', (_ev: any, result: any) => {
+                      setFindInfo(`${result.activeMatchOrdinal} / ${result.matches}`)
+                    }, { once: true })
+                  } else if (webview) {
+                    webview.stopFindInPage('clearSelection')
+                    setFindInfo('')
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const webview = webviewRefs.current[activeTabId || '']
+                    if (webview && findQuery) webview.findInPage(findQuery, { findNext: true })
+                  }
+                }}
+              />
+              {findInfo && (
+                <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
+                  {findInfo}
+                </span>
+              )}
+              <button className="nav-circle-btn" style={{ width: 26, height: 26 }}
+                title="Previous match"
+                onClick={() => {
+                  const webview = webviewRefs.current[activeTabId || '']
+                  if (webview && findQuery) webview.findInPage(findQuery, { forward: false, findNext: true })
+                }}
+              >
+                <ArrowLeft size={13} />
+              </button>
+              <button className="nav-circle-btn" style={{ width: 26, height: 26 }}
+                title="Next match"
+                onClick={() => {
+                  const webview = webviewRefs.current[activeTabId || '']
+                  if (webview && findQuery) webview.findInPage(findQuery, { forward: true, findNext: true })
+                }}
+              >
+                <ArrowRight size={13} />
+              </button>
+              <button className="nav-circle-btn" style={{ width: 26, height: 26, color: '#ef233c' }}
+                title="Close"
+                onClick={() => {
+                  setShowFindBar(false)
+                  const webview = webviewRefs.current[activeTabId || '']
+                  if (webview) webview.stopFindInPage('clearSelection')
+                  setFindQuery('')
+                  setFindInfo('')
+                }}
+              >
+                <X size={13} />
+              </button>
+            </div>
+          )}
+
           {/* Layout horizontal/vertical tabs selector */}
+
           <button
             className="nav-circle-btn"
             title="Toggle Tab Bar Layout"
@@ -851,13 +1062,36 @@ function App(): React.JSX.Element {
                   <Plus size={14} />
                 </button>
               </div>
-              {workspaceTabs.map((tab: any) => (
+              {sortedWorkspaceTabs.map((tab: any) => (
                 <div
                   key={tab.id}
                   className={`vertical-tab ${tab.active ? 'active' : ''}`}
                   onClick={() => setActiveTab(tab.id)}
+                  style={{ paddingRight: 4 }}
                 >
+                  {/* Favicon */}
+                  {tab.favicon ? (
+                    <img
+                      src={tab.favicon}
+                      alt=""
+                      width={12}
+                      height={12}
+                      style={{ borderRadius: 2, flexShrink: 0, objectFit: 'contain' }}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: 10, flexShrink: 0 }}>🌐</span>
+                  )}
+                  {tab.isPinned && <span style={{ fontSize: 9, opacity: 0.7, flexShrink: 0 }}>📌</span>}
                   <span className="tab-title-text">{tab.title}</span>
+                  <button
+                    className="tab-close-btn"
+                    title={tab.isPinned ? 'Unpin' : 'Pin'}
+                    style={{ marginLeft: 'auto', opacity: 0.5 }}
+                    onClick={(e) => { e.stopPropagation(); store.togglePinTab(tab.id) }}
+                  >
+                    <span style={{ fontSize: 9 }}>{tab.isPinned ? '📌' : '⊙'}</span>
+                  </button>
                   <button
                     className="tab-close-btn"
                     onClick={(e) => {
@@ -877,13 +1111,38 @@ function App(): React.JSX.Element {
             {/* Horizontal Tabs Strip (Default) */}
             {tabLayout === 'horizontal' && (
               <div className="tab-bar-horizontal scroller">
-                {workspaceTabs.map((tab: any) => (
+                {sortedWorkspaceTabs.map((tab: any) => (
                   <div
                     key={tab.id}
                     className={`horizontal-tab ${tab.active ? 'active' : ''}`}
                     onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      borderTop: tab.isPinned ? '2px solid var(--bg-accent)' : '2px solid transparent'
+                    }}
                   >
+                    {/* Favicon */}
+                    {tab.favicon ? (
+                      <img
+                        src={tab.favicon}
+                        alt=""
+                        width={13}
+                        height={13}
+                        style={{ borderRadius: 2, flexShrink: 0, objectFit: 'contain' }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: 10, flexShrink: 0, lineHeight: 1 }}>🌐</span>
+                    )}
                     <span className="tab-title-text">{tab.title}</span>
+                    {/* Pin/Unpin button */}
+                    <button
+                      className="tab-close-btn"
+                      title={tab.isPinned ? 'Unpin tab' : 'Pin tab'}
+                      style={{ opacity: 0.5, fontSize: 9, padding: '0 1px' }}
+                      onClick={(e) => { e.stopPropagation(); store.togglePinTab(tab.id) }}
+                    >
+                      {tab.isPinned ? '📌' : '⊙'}
+                    </button>
                     <button
                       className="tab-close-btn"
                       onClick={(e) => {
@@ -898,7 +1157,7 @@ function App(): React.JSX.Element {
 
                 <button
                   className="nav-circle-btn"
-                  style={{ width: 24, height: 24, alignSelf: 'center', marginLeft: 4 }}
+                  style={{ width: 24, height: 24, alignSelf: 'center', marginLeft: 4, flexShrink: 0 }}
                   onClick={() => addTab('New Tab', 'aether://home')}
                 >
                   <Plus size={14} />
