@@ -42,7 +42,8 @@ const api = {
   onShortcut: (channel: string, callback: (event: any, ...args: any[]) => void) => {
     ipcRenderer.on(channel, callback)
     return () => ipcRenderer.removeListener(channel, callback)
-  }
+  },
+  getSearchSuggestions: (query: string) => ipcRenderer.invoke('get-search-suggestions', query)
 }
 
 if (process.contextIsolated) {

@@ -12,7 +12,8 @@ import {
   Terminal,
   Shield,
   Layers,
-  Wifi
+  Wifi,
+  Search
 } from 'lucide-react'
 
 interface StartPageProps {
@@ -26,6 +27,44 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
   const [query, setQuery] = useState('')
   const [searchEngine, setSearchEngine] = useState<'google' | 'duckduckgo' | 'bing'>('google')
   const [showEngineDropdown, setShowEngineDropdown] = useState(false)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1)
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
+
+  // Debounced search suggestions fetch
+  useEffect(() => {
+    const trimmed = query.trim()
+    if (!trimmed) {
+      setSuggestions([])
+      setSelectedIndex(-1)
+      return
+    }
+
+    const handler = setTimeout(async () => {
+      try {
+        if (window.api && typeof window.api.getSearchSuggestions === 'function') {
+          const res = await window.api.getSearchSuggestions(trimmed)
+          setSuggestions((res || []).slice(0, 5))
+        } else {
+          // Stale process fallback: log warning and try renderer fetch
+          console.warn('window.api.getSearchSuggestions is not defined. Please restart your dev server!')
+          const response = await fetch(
+            `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(trimmed)}`
+          )
+          if (response.ok) {
+            const data = await response.json()
+            setSuggestions((data[1] || []).slice(0, 5))
+          }
+        }
+        setSelectedIndex(-1)
+      } catch (err) {
+        console.error('Failed to get suggestions:', err)
+        setSuggestions([])
+      }
+    }, 150) // 150ms debounce
+
+    return () => clearTimeout(handler)
+  }, [query])
 
   // Live clock state
   const [time, setTime] = useState(new Date())
@@ -223,6 +262,44 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
       }
     }
     updateTabUrl(tabId, destination, trimmed)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (showSuggestions && suggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0))
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1))
+      } else if (e.key === 'Escape') {
+        setShowSuggestions(false)
+      } else if (e.key === 'Enter') {
+        if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+          e.preventDefault()
+          const suggestion = suggestions[selectedIndex]
+          setQuery(suggestion)
+
+          const trimmed = suggestion.trim()
+          let destination = trimmed
+          if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+            if (trimmed.includes('.') && !trimmed.includes(' ')) {
+              destination = 'https://' + trimmed
+            } else {
+              if (searchEngine === 'google') {
+                destination = 'https://www.google.com/search?q=' + encodeURIComponent(trimmed)
+              } else if (searchEngine === 'duckduckgo') {
+                destination = 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed)
+              } else {
+                destination = 'https://www.bing.com/search?q=' + encodeURIComponent(trimmed)
+              }
+            }
+          }
+          updateTabUrl(tabId, destination, trimmed)
+          setShowSuggestions(false)
+        }
+      }
+    }
   }
 
   const devShortcuts = [
@@ -594,15 +671,159 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
                 fontFamily: 'var(--font-mono)',
                 borderRadius: 'var(--border-radius-sm)',
                 backgroundColor: 'var(--bg-secondary)',
-                boxShadow: 'var(--shadow-sm)'
+                boxShadow: 'var(--shadow-sm)',
+                width: '100%'
               }}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value)
+                setShowSuggestions(true)
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => {
+                // Short delay to allow clicking on the suggestions
+                setTimeout(() => setShowSuggestions(false), 200)
+              }}
+              onKeyDown={handleKeyDown}
             />
             <Terminal
               size={16}
               style={{ position: 'absolute', left: 16, top: 14, color: 'var(--bg-accent)' }}
             />
+
+            {/* Search Suggestions Dropdown Overlay */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 50,
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'rgba(30, 30, 32, 0.95)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: 10,
+                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  zIndex: 100,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '6px 0'
+                }}
+              >
+                {/* Header Section */}
+                <div
+                  style={{
+                    padding: '8px 16px 4px 16px',
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: 'var(--text-secondary)',
+                    letterSpacing: 1.2,
+                    fontFamily: 'var(--font-mono)',
+                    textTransform: 'uppercase',
+                    opacity: 0.6,
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                    marginBottom: 4,
+                    textAlign: 'left'
+                  }}
+                >
+                  Search Suggestions
+                </div>
+
+                {suggestions.map((suggestion, index) => {
+                  const isSelected = selectedIndex === index
+                  return (
+                    <div
+                      key={suggestion}
+                      onClick={() => {
+                        setQuery(suggestion)
+                        const trimmed = suggestion.trim()
+                        let destination = trimmed
+                        if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+                          if (trimmed.includes('.') && !trimmed.includes(' ')) {
+                            destination = 'https://' + trimmed
+                          } else {
+                            if (searchEngine === 'google') {
+                              destination = 'https://www.google.com/search?q=' + encodeURIComponent(trimmed)
+                            } else if (searchEngine === 'duckduckgo') {
+                              destination = 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed)
+                            } else {
+                              destination = 'https://www.bing.com/search?q=' + encodeURIComponent(trimmed)
+                            }
+                          }
+                        }
+                        updateTabUrl(tabId, destination, trimmed)
+                        setShowSuggestions(false)
+                      }}
+                      style={{
+                        padding: '10px 16px',
+                        cursor: 'pointer',
+                        fontSize: 12.5,
+                        fontFamily: 'var(--font-mono)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        backgroundColor: isSelected ? 'rgba(131, 56, 236, 0.15)' : 'transparent',
+                        color: isSelected ? 'var(--bg-accent)' : 'var(--text-primary)',
+                        transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        borderLeft: isSelected ? '3px solid var(--bg-accent)' : '3px solid transparent',
+                        textAlign: 'left'
+                      }}
+                      onMouseEnter={() => setSelectedIndex(index)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <Search
+                          size={13}
+                          style={{
+                            color: isSelected ? 'var(--bg-accent)' : 'var(--text-secondary)',
+                            opacity: isSelected ? 1 : 0.6,
+                            transition: 'color 0.15s'
+                          }}
+                        />
+                        <span>{suggestion}</span>
+                      </div>
+
+                      {/* Interactive hint on selection */}
+                      {isSelected && (
+                        <span
+                          style={{
+                            fontSize: 9,
+                            fontFamily: 'var(--font-mono)',
+                            color: 'rgba(255, 255, 255, 0.35)',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                            pointerEvents: 'none'
+                          }}
+                        >
+                          enter ↵
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+
+                {/* Footer Controls */}
+                <div
+                  style={{
+                    padding: '8px 16px 4px 16px',
+                    fontSize: 8.5,
+                    fontFamily: 'var(--font-mono)',
+                    color: 'rgba(255, 255, 255, 0.3)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.04)',
+                    marginTop: 4,
+                    paddingTop: 8
+                  }}
+                >
+                  <span>↑↓ Navigate</span>
+                  <span>Esc Close</span>
+                </div>
+              </div>
+            )}
           </div>
         </form>
       </div>
@@ -1527,7 +1748,7 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
               {[
                 { keys: ['⌘', 'T'], desc: 'Open new tab' },
                 { keys: ['⌘', 'W'], desc: 'Close current tab' },
-                { keys: ['⌘', '1–9'], desc: 'Jump to tab by number' },
+                { keys: ['⌘', 'P'], desc: 'Open new private tab' },
               ].map((s) => (
                 <div key={s.desc} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                   <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>{s.desc}</span>
@@ -1550,15 +1771,16 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
               ))}
             </div>
 
-            {/* Group: Sidebar & Navigation */}
+            {/* Group: Navigation & Panels */}
             <div>
               <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#2ec4b6', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
-                Sidebar & Navigation
+                Navigation & Panels
               </div>
               {[
-                { keys: ['⌘', 'B'], desc: 'Toggle bookmarks panel' },
-                { keys: ['⌘', 'L'], desc: 'Toggle history panel' },
-                { keys: ['⌘', '⇧', 'L'], desc: 'Toggle notes panel' },
+                { keys: ['⌘', 'L'], desc: 'Focus address bar' },
+                { keys: ['⌘', 'B'], desc: 'Toggle bookmarks sidebar' },
+                { keys: ['⌘', 'N'], desc: 'Toggle notes panel' },
+                { keys: ['⌘', 'F'], desc: 'Find in page' },
               ].map((s) => (
                 <div key={s.desc} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                   <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>{s.desc}</span>
@@ -1581,15 +1803,17 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
               ))}
             </div>
 
-            {/* Group: Profile & Security */}
+            {/* Group: Profile, Zoom & Workspace */}
             <div>
               <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#ff7b00', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
-                Profile & Security
+                Zoom & Workspaces
               </div>
               {[
-                { keys: ['⌘', '⇧', 'P'], desc: 'Switch / lock profile' },
-                { keys: ['⌘', '⇧', 'N'], desc: 'Open new private window' },
-                { keys: ['⌘', ','], desc: 'Open profile settings' },
+                { keys: ['⌘', 'I'], desc: 'Zoom in' },
+                { keys: ['⌘', 'O'], desc: 'Zoom out' },
+                { keys: ['⌘', 'E'], desc: 'Reset zoom' },
+                { keys: ['⌘', 'K'], desc: 'Lock profile' },
+                { keys: ['⌘', 'G'], desc: 'Cycle workspaces' },
               ].map((s) => (
                 <div key={s.desc} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                   <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>{s.desc}</span>

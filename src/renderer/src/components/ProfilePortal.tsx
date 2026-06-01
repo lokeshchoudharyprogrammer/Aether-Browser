@@ -14,7 +14,9 @@ import {
   Trash2,
   KeyRound,
   Grid3X3,
-  ChevronLeft
+  ChevronLeft,
+  Layers,
+  Bookmark
 } from 'lucide-react'
 
 export const ProfilePortal: React.FC = () => {
@@ -145,16 +147,21 @@ export const ProfilePortal: React.FC = () => {
 
   return (
     <div className="lock-portal">
-      {/* Background Animated Gradient Mesh */}
-      <div className="ambient-orbs-wrapper">
-        <div className="ambient-orb ambient-orb-1" />
-        <div className="ambient-orb ambient-orb-2" />
-        <div className="ambient-orb ambient-orb-3" />
-      </div>
-
       {selectedProfileId ? (
-        // --- Redesigned Lock Screen Prompt ---
-        <div className="lock-glass-card" style={{ maxWidth: 440 }}>
+        // --- Spacious Full-Page Lock Screen Prompt ---
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 380,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 24,
+            padding: '40px 20px',
+            animation: 'fadeIn 0.3s ease-out',
+            position: 'relative'
+          }}
+        >
           <button
             type="button"
             className="nav-circle-btn"
@@ -330,8 +337,20 @@ export const ProfilePortal: React.FC = () => {
           </form>
         </div>
       ) : showAddForm ? (
-        // --- Redesigned Create Profile Form ---
-        <div className="lock-glass-card" style={{ maxWidth: 460 }}>
+        // --- Spacious Full-Page Create Profile Form ---
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 440,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 24,
+            padding: '40px 20px',
+            animation: 'fadeIn 0.3s ease-out',
+            position: 'relative'
+          }}
+        >
           <button
             type="button"
             className="nav-circle-btn"
@@ -527,8 +546,20 @@ export const ProfilePortal: React.FC = () => {
           </form>
         </div>
       ) : editingProfileId ? (
-        // --- Redesigned Manage/Edit Profile Form ---
-        <div className="lock-glass-card" style={{ maxWidth: 460 }}>
+        // --- Spacious Full-Page Manage/Edit Profile Form ---
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 440,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 24,
+            padding: '40px 20px',
+            animation: 'fadeIn 0.3s ease-out',
+            position: 'relative'
+          }}
+        >
           <button
             type="button"
             className="nav-circle-btn"
@@ -759,24 +790,33 @@ export const ProfilePortal: React.FC = () => {
           </form>
         </div>
       ) : (
-        // --- Redesigned Profile Selection Grid ---
-        <div className="lock-glass-card" style={{ maxWidth: 540 }}>
+        // --- Spacious Full-Page Profile Selection Grid ---
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 720,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 32,
+            padding: '40px 20px',
+            animation: 'fadeIn 0.3s ease-out'
+          }}
+        >
           <div>
             <h1
               style={{
-                fontSize: 34,
-                fontWeight: 800,
+                fontSize: 28,
+                fontWeight: 700,
                 letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg, var(--bg-accent, #8338ec) 30%, #ff007f 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: '#ffffff',
                 marginBottom: 6
               }}
             >
               Aether Browser
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-              Select your sandboxed profile workspace to begin
+              Select a profile workspace to begin
             </p>
           </div>
 
@@ -819,9 +859,9 @@ export const ProfilePortal: React.FC = () => {
                   </button>
 
                   <div className="profile-avatar-circle-wrapper">
-                    <AvatarIcon name={p.avatar} size={24} style={{ color: 'var(--bg-accent, #8338ec)' }} />
+                    <AvatarIcon name={p.avatar} size={30} style={{ color: 'var(--bg-accent, #8338ec)' }} />
                   </div>
-                  
+
                   <div style={{ textAlign: 'center', width: '100%' }}>
                     <div
                       style={{
@@ -836,9 +876,28 @@ export const ProfilePortal: React.FC = () => {
                     >
                       {p.name}
                     </div>
-                    <div className="profile-badge-count">
-                      {wsCount === 1 ? '1 workspace' : `${wsCount} workspaces`}
-                      {bmCount > 0 && ` • ${bmCount} ${bmCount === 1 ? 'bookmark' : 'bookmarks'}`}
+                    <div
+                      className="profile-badge-count"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        marginTop: 4,
+                        fontSize: 10,
+                        color: 'var(--text-secondary)'
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 3 }} title="Workspaces">
+                        <Layers size={10} style={{ opacity: 0.6 }} />
+                        <span>{wsCount}</span>
+                      </span>
+                      {bmCount > 0 && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 3 }} title="Bookmarks">
+                          <Bookmark size={10} style={{ opacity: 0.6 }} />
+                          <span>{bmCount}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -853,7 +912,7 @@ export const ProfilePortal: React.FC = () => {
                         marginTop: 2
                       }}
                     >
-                      <Lock size={10} style={{ color: 'var(--bg-accent, #8338ec)' }} />
+                      <Lock size={12} style={{ color: 'var(--bg-accent, #8338ec)' }} />
                       <span>Protected</span>
                     </div>
                   ) : (
@@ -867,7 +926,7 @@ export const ProfilePortal: React.FC = () => {
                         marginTop: 2
                       }}
                     >
-                      <Unlock size={10} style={{ color: '#2ec4b6' }} />
+                      <Unlock size={12} style={{ color: '#2ec4b6' }} />
                       <span>Quick Entry</span>
                     </div>
                   )}
@@ -898,7 +957,7 @@ export const ProfilePortal: React.FC = () => {
                   borderColor: 'rgba(255, 255, 255, 0.2)'
                 }}
               >
-                <UserPlus size={18} style={{ color: 'var(--text-secondary)' }} />
+                <UserPlus size={26} style={{ color: 'var(--text-secondary)' }} />
               </div>
               <div
                 style={{

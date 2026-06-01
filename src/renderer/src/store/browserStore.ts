@@ -9,6 +9,7 @@ export interface Tab {
   favicon?: string
   isPinned: boolean
   active: boolean
+  isPrivate?: boolean
 }
 
 export interface Bookmark {
@@ -142,7 +143,7 @@ interface BrowserStore {
   deleteWorkspace: (id: string) => Promise<void>
 
   // Tab CRUD
-  addTab: (title: string, url: string) => void
+  addTab: (title: string, url: string, isPrivate?: boolean) => void
   closeTab: (tabId: string) => void
   updateTabUrl: (tabId: string, url: string, title?: string) => void
   updateTabFavicon: (tabId: string, favicon: string) => void
@@ -528,7 +529,7 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
   },
 
   // Tabs
-  addTab: (title, url) => {
+  addTab: (title, url, isPrivate) => {
     const { db, activeWorkspaceId } = get()
     if (!db || !activeWorkspaceId) return
 
@@ -546,7 +547,8 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
       title,
       url,
       isPinned: false,
-      active: true
+      active: true,
+      isPrivate: !!isPrivate
     })
 
     set({ activeTabId: id, db: { ...db } })

@@ -22,8 +22,209 @@ import {
   Code,
   LogOut,
   User,
-  Trash2
+  Trash2,
+  Globe,
+  Pin,
+  PinOff,
+  Columns2,
+  Search,
+  ChevronDown,
+  RotateCcw,
+  ArrowUpDown
 } from 'lucide-react'
+
+const getErrorPageHtml = (url: string, errorDescription: string, errorCode: number) => {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>This site can’t be reached</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <style>
+        :root {
+          --bg-color: #1f1f1f;
+          --text-primary: #e3e3e3;
+          --text-secondary: #9aa0a6;
+          --accent-color: #8ab4f8;
+          --accent-hover: #aecbfa;
+          --border-color: #3c4043;
+          --link-color: #8ab4f8;
+        }
+        @media (prefers-color-scheme: light) {
+          :root {
+            --bg-color: #ffffff;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --accent-color: #1a73e8;
+            --accent-hover: #1557b0;
+            --border-color: #dadce0;
+            --link-color: #1a73e8;
+          }
+        }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          background-color: var(--bg-color);
+          color: var(--text-primary);
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          box-sizing: border-box;
+        }
+        .main-container {
+          max-width: 600px;
+          width: 100%;
+          padding: 40px 24px;
+          animation: fadeIn 0.4s ease-out;
+        }
+        .icon {
+          width: 64px;
+          height: 64px;
+          margin-bottom: 24px;
+          color: var(--text-secondary);
+          opacity: 0.8;
+        }
+        h1 {
+          font-size: 22px;
+          font-weight: 500;
+          margin: 0 0 16px 0;
+          line-height: 1.3;
+        }
+        p {
+          font-size: 14px;
+          line-height: 1.6;
+          margin: 0 0 24px 0;
+          color: var(--text-primary);
+        }
+        .suggestions {
+          font-size: 14px;
+          color: var(--text-secondary);
+          margin-bottom: 32px;
+        }
+        .suggestions p {
+          color: var(--text-secondary);
+          margin-bottom: 8px;
+          font-weight: 500;
+        }
+        .suggestions ul {
+          margin: 0;
+          padding-left: 20px;
+        }
+        .suggestions li {
+          margin-bottom: 8px;
+          line-height: 1.5;
+        }
+        .actions {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          border-bottom: 1px solid var(--border-color);
+          padding-bottom: 24px;
+          margin-bottom: 20px;
+        }
+        .btn-blue {
+          background-color: var(--accent-color);
+          color: var(--bg-color);
+          border: none;
+          padding: 10px 24px;
+          border-radius: 4px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background-color 0.15s ease, box-shadow 0.15s ease;
+          font-family: inherit;
+        }
+        .btn-blue:hover {
+          background-color: var(--accent-hover);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .details-toggle {
+          font-size: 14px;
+          color: var(--link-color);
+          text-decoration: none;
+          cursor: pointer;
+          font-weight: 500;
+          border: none;
+          background: none;
+          padding: 0;
+        }
+        .details-toggle:hover {
+          text-decoration: underline;
+        }
+        .error-code {
+          font-size: 12px;
+          color: var(--text-secondary);
+          font-family: monospace;
+          margin-top: 12px;
+        }
+        .details-panel {
+          display: none;
+          font-size: 13px;
+          color: var(--text-secondary);
+          line-height: 1.6;
+          background: rgba(0,0,0,0.03);
+          border-left: 3px solid var(--border-color);
+          padding: 12px 16px;
+          margin-top: 16px;
+          border-radius: 0 4px 4px 0;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      </style>
+      <script>
+        function toggleDetails() {
+          const panel = document.getElementById('details-panel');
+          const btn = document.getElementById('details-btn');
+          if (panel.style.display === 'block') {
+            panel.style.display = 'none';
+            btn.textContent = 'Details';
+          } else {
+            panel.style.display = 'block';
+            btn.textContent = 'Hide details';
+          }
+        }
+      </script>
+    </head>
+    <body>
+      <div class="main-container">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+        <h1>This site can’t be reached</h1>
+        <p>
+          The connection to <strong>${url}</strong> was refused or the server's IP address could not be found.
+        </p>
+        
+        <div class="suggestions">
+          <p>Try:</p>
+          <ul>
+            <li>Checking the connection</li>
+            <li>Checking the proxy and the firewall</li>
+            <li>Checking the spelling of the address</li>
+          </ul>
+        </div>
+
+        <div class="actions">
+          <button class="btn-blue" onclick="window.location.href='${url}'">Reload</button>
+          <button id="details-btn" class="details-toggle" onclick="toggleDetails()">Details</button>
+        </div>
+
+        <div id="details-panel" class="details-panel">
+          Error description: ${errorDescription}<br>
+          Error code: ${errorCode}
+        </div>
+
+        <div class="error-code">${errorDescription}</div>
+      </div>
+    </body>
+    </html>
+  `;
+};
 
 function App(): React.JSX.Element {
   const store = useBrowserStore()
@@ -49,6 +250,90 @@ function App(): React.JSX.Element {
 
   const [addressInput, setAddressInput] = useState('')
   const [tabLayout, setTabLayout] = useState<'horizontal' | 'vertical'>('horizontal')
+
+  // State for top address bar search suggestions
+  const [topSuggestions, setTopSuggestions] = useState<string[]>([])
+  const [topSelectedIndex, setTopSelectedIndex] = useState<number>(-1)
+  const [showTopSuggestions, setShowTopSuggestions] = useState<boolean>(false)
+
+  // Debounced search suggestions fetch for top bar
+  useEffect(() => {
+    const trimmed = addressInput.trim()
+
+    // Skip if empty or looks like a URL/domain name
+    if (
+      !trimmed ||
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('https://') ||
+      (trimmed.includes('.') && !trimmed.includes(' '))
+    ) {
+      setTopSuggestions([])
+      setTopSelectedIndex(-1)
+      return
+    }
+
+    const handler = setTimeout(async () => {
+      try {
+        if (window.api && typeof window.api.getSearchSuggestions === 'function') {
+          const res = await window.api.getSearchSuggestions(trimmed)
+          setTopSuggestions((res || []).slice(0, 5))
+        } else {
+          const response = await fetch(
+            `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(trimmed)}`
+          )
+          if (response.ok) {
+            const data = await response.json()
+            setTopSuggestions((data[1] || []).slice(0, 5))
+          }
+        }
+        setTopSelectedIndex(-1)
+      } catch (err) {
+        console.error('Failed to get top suggestions:', err)
+        setTopSuggestions([])
+      }
+    }, 150) // 150ms debounce
+
+    return () => clearTimeout(handler)
+  }, [addressInput])
+
+  const handleTopKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (showTopSuggestions && topSuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setTopSelectedIndex((prev) => (prev < topSuggestions.length - 1 ? prev + 1 : 0))
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setTopSelectedIndex((prev) => (prev > 0 ? prev - 1 : topSuggestions.length - 1))
+      } else if (e.key === 'Escape') {
+        setShowTopSuggestions(false)
+      } else if (e.key === 'Enter') {
+        if (topSelectedIndex >= 0 && topSelectedIndex < topSuggestions.length) {
+          e.preventDefault()
+          const suggestion = topSuggestions[topSelectedIndex]
+          setAddressInput(suggestion)
+
+          let url = suggestion.trim()
+          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            if (url.includes('.') && !url.includes(' ')) {
+              url = 'https://' + url
+            } else {
+              url = 'https://www.google.com/search?q=' + encodeURIComponent(url)
+            }
+          }
+
+          updateTabUrl(activeTabId || '', url, url)
+          setAddressInput(url)
+
+          const webview = webviewRefs.current[activeTabId || '']
+          if (webview) {
+            webview.src = url
+          }
+          setShowTopSuggestions(false)
+        }
+      }
+    }
+  }
+
   const [loadedTabIds, setLoadedTabIds] = useState<string[]>([])
 
   // Find in Page state
@@ -60,6 +345,121 @@ function App(): React.JSX.Element {
   const [sourceCode, setSourceCode] = useState('')
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false)
   const [newWorkspaceName, setNewWorkspaceName] = useState('')
+  const [splitTabId, setSplitTabId] = useState<string | null>(null)
+  const [showSplitSelector, setShowSplitSelector] = useState(false)
+
+  const activeTabIdRef = useRef(activeTabId)
+  const splitTabIdRef = useRef(splitTabId)
+
+  useEffect(() => {
+    activeTabIdRef.current = activeTabId
+  }, [activeTabId])
+
+  useEffect(() => {
+    splitTabIdRef.current = splitTabId
+  }, [splitTabId])
+
+  const workspaceTabs = db ? db.tabs.filter((t: any) => t.workspaceId === activeWorkspaceId) : []
+
+  // Auto-close split if the split tab is closed
+  useEffect(() => {
+    if (splitTabId && !workspaceTabs.some((t: any) => t.id === splitTabId)) {
+      setSplitTabId(null)
+    }
+  }, [workspaceTabs, splitTabId])
+
+  // Close split selector if workspace changes
+  useEffect(() => {
+    setShowSplitSelector(false)
+  }, [activeWorkspaceId])
+
+  const [splitRatio, setSplitRatio] = useState<number>(0.5)
+  const [isResizing, setIsResizing] = useState<boolean>(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizing(true)
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        const newRatio = (moveEvent.clientX - rect.left) / rect.width
+        const constrainedRatio = Math.max(0.15, Math.min(0.85, newRatio))
+        setSplitRatio(constrainedRatio)
+      }
+    }
+
+    const onMouseUp = () => {
+      setIsResizing(false)
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+  }
+
+  // Reset split ratio when split view is deactivated
+  useEffect(() => {
+    if (!splitTabId) {
+      setSplitRatio(0.5)
+    }
+  }, [splitTabId])
+
+  // Tab toolbar states
+  const [lastClosedTabs, setLastClosedTabs] = useState<{ title: string; url: string; isPrivate: boolean }[]>([])
+  const [showTabSearch, setShowTabSearch] = useState(false)
+  const [tabSearchQuery, setTabSearchQuery] = useState('')
+  const [showTabMenu, setShowTabMenu] = useState(false)
+
+  const handleCloseTab = (tabId: string) => {
+    if (!db) return
+    const tabObj = db.tabs.find((t: any) => t.id === tabId)
+    if (tabObj) {
+      setLastClosedTabs((prev) => [
+        { title: tabObj.title, url: tabObj.url, isPrivate: !!tabObj.isPrivate },
+        ...prev
+      ].slice(0, 15))
+    }
+    closeTab(tabId)
+  }
+
+  const handleReopenLastClosedTab = () => {
+    if (lastClosedTabs.length > 0) {
+      const [last, ...remaining] = lastClosedTabs
+      addTab(last.title, last.url, last.isPrivate)
+      setLastClosedTabs(remaining)
+    }
+  }
+
+  const handleCloseOtherTabs = () => {
+    workspaceTabs.forEach((t: Tab) => {
+      if (t.id !== activeTabId) {
+        closeTab(t.id)
+      }
+    })
+  }
+
+  const handleCloseAllTabs = () => {
+    addTab('New Tab', 'aether://home')
+    workspaceTabs.forEach((t: Tab) => {
+      closeTab(t.id)
+    })
+  }
+
+  const handleSortTabs = (type: 'title' | 'url') => {
+    if (!db) return
+    const sorted = [...workspaceTabs].sort((a: Tab, b: Tab) => {
+      const valA = type === 'title' ? a.title : a.url
+      const valB = type === 'title' ? b.title : b.url
+      return valA.localeCompare(valB)
+    })
+
+    const otherWorkspaceTabs = db.tabs.filter((t: Tab) => t.workspaceId !== activeWorkspaceId)
+    db.tabs = [...otherWorkspaceTabs, ...sorted]
+    store.syncDb()
+  }
 
   const webviewRefs = useRef<Record<string, any>>({})
 
@@ -113,8 +513,16 @@ function App(): React.JSX.Element {
 
   // Manage lazy loading tabs
   useEffect(() => {
+    const toLoad: string[] = []
     if (activeTabId && !loadedTabIds.includes(activeTabId)) {
-      setLoadedTabIds([...loadedTabIds, activeTabId])
+      toLoad.push(activeTabId)
+    }
+    const isSplit = splitTabId !== null && splitTabId !== activeTabId && (db?.tabs.some((t: any) => t.id === splitTabId) ?? false)
+    if (isSplit && splitTabId && !loadedTabIds.includes(splitTabId)) {
+      toLoad.push(splitTabId)
+    }
+    if (toLoad.length > 0) {
+      setLoadedTabIds((prev) => [...prev, ...toLoad])
     }
 
     if (activeTabId && db) {
@@ -123,7 +531,7 @@ function App(): React.JSX.Element {
         setAddressInput(activeTab.url)
       }
     }
-  }, [activeTabId, db])
+  }, [activeTabId, splitTabId, db])
 
   // Register global shortcuts and window event listeners
   useEffect(() => {
@@ -135,7 +543,7 @@ function App(): React.JSX.Element {
     // 2. Close Current Tab
     const cleanCloseTab = window.api.onShortcut('shortcut-close-tab', () => {
       if (activeTabId) {
-        closeTab(activeTabId)
+        handleCloseTab(activeTabId)
       }
     })
 
@@ -158,21 +566,63 @@ function App(): React.JSX.Element {
       setActiveProfile(null)
     })
 
-    // 6. Switch Workspace
-    const cleanSwitchWorkspace = window.api.onShortcut('shortcut-switch-workspace', (_, num: number) => {
-      const index = num - 1
+    // 6. Cycle Workspaces
+    const cleanCycleWorkspace = window.api.onShortcut('shortcut-cycle-workspace', () => {
       const workspaces = db?.workspaces.filter((w: any) => w.profileId === activeProfileId) || []
-      if (workspaces[index]) {
-        setActiveWorkspace(workspaces[index].id)
+      if (workspaces.length > 0) {
+        const currentIndex = workspaces.findIndex((w: any) => w.id === activeWorkspaceId)
+        const nextIndex = (currentIndex + 1) % workspaces.length
+        setActiveWorkspace(workspaces[nextIndex].id)
       }
+    })
+
+    // 7. Zoom In
+    const cleanZoomIn = window.api.onShortcut('shortcut-zoom-in', () => {
+      if (activeTabId) {
+        const current = tabZoom[activeTabId] ?? 1
+        const next = Math.min(3, Math.round((current + 0.1) * 10) / 10)
+        setTabZoom(activeTabId, next)
+        const webview = webviewRefs.current[activeTabId]
+        if (webview) webview.setZoomFactor(next)
+      }
+    })
+
+    // 8. Zoom Out
+    const cleanZoomOut = window.api.onShortcut('shortcut-zoom-out', () => {
+      if (activeTabId) {
+        const current = tabZoom[activeTabId] ?? 1
+        const next = Math.max(0.3, Math.round((current - 0.1) * 10) / 10)
+        setTabZoom(activeTabId, next)
+        const webview = webviewRefs.current[activeTabId]
+        if (webview) webview.setZoomFactor(next)
+      }
+    })
+
+    // 9. Zoom Reset
+    const cleanZoomReset = window.api.onShortcut('shortcut-zoom-reset', () => {
+      if (activeTabId) {
+        setTabZoom(activeTabId, 1)
+        const webview = webviewRefs.current[activeTabId]
+        if (webview) webview.setZoomFactor(1)
+      }
+    })
+
+    // 10. New Private Window
+    const cleanNewPrivate = window.api.onShortcut('shortcut-new-private', () => {
+      addTab('Private Tab', 'aether://home', true)
+    })
+
+    // 11. Toggle Notes Panel
+    const cleanToggleNotes = window.api.onShortcut('shortcut-toggle-notes', () => {
+      setSidebarTab(activeSidebarTab === 'notes' ? 'none' : 'notes')
     })
 
     // Local keydown listener for the chrome frame
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey
 
-      // Lock Profile: Ctrl/Cmd + Shift + L
-      if (isMod && e.shiftKey && e.key.toLowerCase() === 'l') {
+      // Lock Profile: Ctrl/Cmd + K
+      if (isMod && e.key.toLowerCase() === 'k') {
         e.preventDefault()
         setActiveProfile(null)
         return
@@ -186,7 +636,7 @@ function App(): React.JSX.Element {
       }
 
       // Focus Address Bar: Ctrl/Cmd + L
-      if (isMod && !e.shiftKey && e.key.toLowerCase() === 'l') {
+      if (isMod && e.key.toLowerCase() === 'l') {
         e.preventDefault()
         const addressInputEl = document.getElementById('address-bar')
         if (addressInputEl) {
@@ -207,23 +657,25 @@ function App(): React.JSX.Element {
       if (isMod && e.key.toLowerCase() === 'w') {
         e.preventDefault()
         if (activeTabId) {
-          closeTab(activeTabId)
+          handleCloseTab(activeTabId)
         }
         return
       }
 
-      // Switch Workspace: Ctrl/Cmd + Shift + [1-9]
-      if (isMod && e.shiftKey && /^[1-9]$/.test(e.key)) {
+      // Cycle Workspaces: Ctrl/Cmd + G
+      if (isMod && e.key.toLowerCase() === 'g') {
         e.preventDefault()
-        const index = parseInt(e.key) - 1
         const workspaces = db?.workspaces.filter((w: any) => w.profileId === activeProfileId) || []
-        if (workspaces[index]) {
-          setActiveWorkspace(workspaces[index].id)
+        if (workspaces.length > 0) {
+          const currentIndex = workspaces.findIndex((w: any) => w.id === activeWorkspaceId)
+          const nextIndex = (currentIndex + 1) % workspaces.length
+          setActiveWorkspace(workspaces[nextIndex].id)
         }
         return
       }
-      // Zoom: Cmd+= or Cmd++ (zoom in)
-      if (isMod && !e.shiftKey && (e.key === '=' || e.key === '+')) {
+
+      // Zoom: Cmd+I (zoom in)
+      if (isMod && e.key.toLowerCase() === 'i') {
         e.preventDefault()
         if (activeTabId) {
           const current = tabZoom[activeTabId] ?? 1
@@ -235,8 +687,8 @@ function App(): React.JSX.Element {
         return
       }
 
-      // Zoom: Cmd+- (zoom out)
-      if (isMod && e.key === '-') {
+      // Zoom: Cmd+O (zoom out)
+      if (isMod && e.key.toLowerCase() === 'o') {
         e.preventDefault()
         if (activeTabId) {
           const current = tabZoom[activeTabId] ?? 1
@@ -248,14 +700,28 @@ function App(): React.JSX.Element {
         return
       }
 
-      // Zoom: Cmd+0 (reset)
-      if (isMod && e.key === '0') {
+      // Zoom: Cmd+E (reset)
+      if (isMod && e.key.toLowerCase() === 'e') {
         e.preventDefault()
         if (activeTabId) {
           setTabZoom(activeTabId, 1)
           const webview = webviewRefs.current[activeTabId]
           if (webview) webview.setZoomFactor(1)
         }
+        return
+      }
+
+      // New Private Tab: Cmd+P
+      if (isMod && e.key.toLowerCase() === 'p') {
+        e.preventDefault()
+        addTab('Private Tab', 'aether://home', true)
+        return
+      }
+
+      // Toggle Notes Panel: Cmd+N
+      if (isMod && e.key.toLowerCase() === 'n') {
+        e.preventDefault()
+        setSidebarTab(activeSidebarTab === 'notes' ? 'none' : 'notes')
         return
       }
 
@@ -294,7 +760,12 @@ function App(): React.JSX.Element {
       cleanToggleSidebar()
       cleanFocusAddress()
       cleanLockProfile()
-      cleanSwitchWorkspace()
+      cleanCycleWorkspace()
+      cleanZoomIn()
+      cleanZoomOut()
+      cleanZoomReset()
+      cleanNewPrivate()
+      cleanToggleNotes()
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [
@@ -338,8 +809,8 @@ function App(): React.JSX.Element {
 
   const activeProfile = db.profiles.find((p: any) => p.id === activeProfileId)
   const userWorkspaces = db.workspaces.filter((w: any) => w.profileId === activeProfileId)
-  const workspaceTabs = db.tabs.filter((t: any) => t.workspaceId === activeWorkspaceId)
   const activeTabObj = workspaceTabs.find((t: any) => t.id === activeTabId)
+  const isSplitActive = splitTabId !== null && splitTabId !== activeTabId && workspaceTabs.some((t: any) => t.id === splitTabId)
 
   const themeClass = activeProfile ? `theme-${activeProfile.themeId}` : 'theme-dark'
 
@@ -373,6 +844,10 @@ function App(): React.JSX.Element {
     }
   }
 
+  const handleToggleSplit = () => {
+    setShowSplitSelector((prev) => !prev)
+  }
+
   // Address submission
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -401,16 +876,32 @@ function App(): React.JSX.Element {
     if (!webview) return
     webviewRefs.current[id] = webview
 
-    // Clean first
-    webview.removeEventListener('dom-ready', () => {})
+    if (webview.__listenersAttached) return
+    webview.__listenersAttached = true
+
+    webview.addEventListener('focus', () => {
+      const currentActiveId = activeTabIdRef.current
+      const currentSplitId = splitTabIdRef.current
+      const isSplit = currentSplitId !== null && currentSplitId !== currentActiveId
+      if (isSplit && id === currentSplitId) {
+        store.setActiveTab(id)
+        setSplitTabId(currentActiveId)
+      }
+    })
 
     webview.addEventListener('dom-ready', () => {
       try {
         const url = webview.getURL()
+        if (url.startsWith('data:text/html')) {
+          // Skip updating address bar/history/URLs for our custom HTML error page
+          return
+        }
         const title = webview.getTitle()
         updateTabUrl(id, url, title)
         addHistory(title, url)
-        if (id === activeTabId) {
+        
+        const currentActiveId = useBrowserStore.getState().activeTabId
+        if (id === currentActiveId) {
           setAddressInput(url)
         }
 
@@ -499,6 +990,17 @@ function App(): React.JSX.Element {
           .catch((err) => console.error('Ad blocker script injection failed:', err))
       } catch (e) {
         // Suppress errors
+      }
+    })
+
+    webview.addEventListener('did-fail-load', (e: any) => {
+      if (e.isMainFrame) {
+        // -3 is ERR_ABORTED (user aborted loading, ignore)
+        if (e.errorCode === -3) return
+
+        const errorHtml = getErrorPageHtml(e.validatedURL, e.errorDescription, e.errorCode)
+        const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(errorHtml)}`
+        webview.loadURL(dataUrl)
       }
     })
   }
@@ -850,8 +1352,159 @@ function App(): React.JSX.Element {
       {/* 4. MAIN BROWSER VIEWPORT CONTAINER                            */}
       {/* ============================================================== */}
       <div className="main-browser-area">
+        {showSplitSelector && (
+          <div
+            style={{
+              position: 'absolute',
+              right: 16,
+              top: 54,
+              width: 320,
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 12,
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4)',
+              zIndex: 100,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              backdropFilter: 'blur(12px)',
+            }}
+          >
+            {/* Panel Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border-color)' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+                Split Screen View Setup
+              </span>
+              <button
+                onClick={() => setShowSplitSelector(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', padding: 4, borderRadius: '50%' }}
+                className="tab-close-btn"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            {/* Panel Content / Tab List */}
+            <div style={{ padding: '6px 0', maxHeight: 260, overflowY: 'auto' }} className="scroller">
+              {workspaceTabs.filter((t: Tab) => t.id !== activeTabId).length === 0 ? (
+                <div style={{ padding: '20px 16px', textAlign: 'center', fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'var(--font-sans)' }}>
+                  No other open tabs in this workspace to pair.
+                </div>
+              ) : (
+                workspaceTabs
+                  .filter((t: Tab) => t.id !== activeTabId)
+                  .map((tab: Tab) => {
+                    const isCurrentlySplit = splitTabId === tab.id
+                    return (
+                      <div
+                        key={tab.id}
+                        onClick={() => {
+                          setSplitTabId(tab.id)
+                          setShowSplitSelector(false)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: '10px 16px',
+                          cursor: 'pointer',
+                          backgroundColor: isCurrentlySplit ? 'rgba(131,56,236,0.1)' : 'transparent',
+                          transition: 'background 0.2s',
+                        }}
+                        className="notes-list-item"
+                      >
+                        {/* Tab Icon */}
+                        {tab.isPrivate ? (
+                          <Shield size={14} style={{ color: '#2ec4b6', flexShrink: 0 }} />
+                        ) : (
+                          <Globe size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+                        )}
+                        {/* Title & URL */}
+                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                          <span style={{ fontSize: 12, fontWeight: isCurrentlySplit ? 600 : 400, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {tab.title || 'Untitled Tab'}
+                          </span>
+                          <span style={{ fontSize: 9, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', opacity: 0.8 }}>
+                            {tab.url}
+                          </span>
+                        </div>
+                        {/* Active check / badge */}
+                        {isCurrentlySplit && (
+                          <span style={{ fontSize: 8, fontWeight: 800, color: 'var(--bg-accent)', background: 'rgba(131,56,236,0.15)', padding: '2px 6px', borderRadius: 4, fontFamily: 'var(--font-mono)' }}>
+                            SPLIT
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })
+              )}
+            </div>
+
+            {/* Actions Footer */}
+            <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-tertiary)' }}>
+              <button
+                onClick={() => {
+                  const prevActive = activeTabId
+                  addTab('New Tab', 'aether://home')
+                  if (prevActive) {
+                    setSplitTabId(prevActive)
+                  }
+                  setShowSplitSelector(false)
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px dashed var(--border-color)',
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  width: '100%',
+                  transition: 'all 0.2s',
+                }}
+                className="notes-list-item"
+              >
+                <Plus size={12} />
+                Split with a New Tab
+              </button>
+
+              {isSplitActive && (
+                <button
+                  onClick={() => {
+                    setSplitTabId(null)
+                    setShowSplitSelector(false)
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    border: 'none',
+                    background: 'rgba(239, 35, 60, 0.12)',
+                    color: '#ef233c',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    width: '100%',
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  <X size={12} />
+                  Exit Split View
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         {/* Top Navbar */}
-        <div className="top-navigation-bar">
+        <div className="top-navigation-bar" style={{ zIndex: 100 }}>
           <button className="nav-circle-btn" onClick={handleGoBack} title="Back">
             <ArrowLeft size={16} />
           </button>
@@ -862,7 +1515,7 @@ function App(): React.JSX.Element {
             <RotateCw size={15} />
           </button>
 
-          <form onSubmit={handleAddressSubmit} className="address-bar-container">
+          <form onSubmit={handleAddressSubmit} className="address-bar-container" style={{ position: 'relative' }}>
             <Shield
               size={14}
               style={{ color: store.adBlockedCount > 0 ? '#2ec4b6' : 'var(--text-secondary)' }}
@@ -872,9 +1525,152 @@ function App(): React.JSX.Element {
               type="text"
               className="address-input"
               value={addressInput}
-              onChange={(e) => setAddressInput(e.target.value)}
-              onFocus={(e) => e.target.select()}
+              onChange={(e) => {
+                setAddressInput(e.target.value)
+                setShowTopSuggestions(true)
+              }}
+              onFocus={(e) => {
+                e.target.select()
+                setShowTopSuggestions(true)
+              }}
+              onBlur={() => {
+                // Short delay to allow clicking on the suggestions
+                setTimeout(() => setShowTopSuggestions(false), 200)
+              }}
+              onKeyDown={handleTopKeyDown}
             />
+
+            {/* Top Search Suggestions Dropdown Overlay */}
+            {showTopSuggestions && topSuggestions.length > 0 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 40,
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'rgba(30, 30, 32, 0.95)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: 10,
+                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  zIndex: 99999,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '6px 0'
+                }}
+              >
+                {/* Header Section */}
+                <div
+                  style={{
+                    padding: '8px 16px 4px 16px',
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: 'var(--text-secondary)',
+                    letterSpacing: 1.2,
+                    fontFamily: 'var(--font-mono)',
+                    textTransform: 'uppercase',
+                    opacity: 0.6,
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                    marginBottom: 4,
+                    textAlign: 'left'
+                  }}
+                >
+                  Search Suggestions
+                </div>
+
+                {topSuggestions.map((suggestion, index) => {
+                  const isSelected = topSelectedIndex === index
+                  return (
+                    <div
+                      key={suggestion}
+                      onClick={() => {
+                        setAddressInput(suggestion)
+                        let url = suggestion.trim()
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                          if (url.includes('.') && !url.includes(' ')) {
+                            url = 'https://' + url
+                          } else {
+                            url = 'https://www.google.com/search?q=' + encodeURIComponent(url)
+                          }
+                        }
+                        updateTabUrl(activeTabId || '', url, url)
+                        setAddressInput(url)
+                        const webview = webviewRefs.current[activeTabId || '']
+                        if (webview) {
+                          webview.src = url
+                        }
+                        setShowTopSuggestions(false)
+                      }}
+                      style={{
+                        padding: '10px 16px',
+                        cursor: 'pointer',
+                        fontSize: 12.5,
+                        fontFamily: 'var(--font-mono)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        backgroundColor: isSelected ? 'rgba(131, 56, 236, 0.15)' : 'transparent',
+                        color: isSelected ? 'var(--bg-accent)' : 'var(--text-primary)',
+                        transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        borderLeft: isSelected ? '3px solid var(--bg-accent)' : '3px solid transparent',
+                        textAlign: 'left'
+                      }}
+                      onMouseEnter={() => setTopSelectedIndex(index)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <Search
+                          size={13}
+                          style={{
+                            color: isSelected ? 'var(--bg-accent)' : 'var(--text-secondary)',
+                            opacity: isSelected ? 1 : 0.6,
+                            transition: 'color 0.15s'
+                          }}
+                        />
+                        <span>{suggestion}</span>
+                      </div>
+
+                      {/* Interactive hint on selection */}
+                      {isSelected && (
+                        <span
+                          style={{
+                            fontSize: 9,
+                            fontFamily: 'var(--font-mono)',
+                            color: 'rgba(255, 255, 255, 0.35)',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                            pointerEvents: 'none'
+                          }}
+                        >
+                          enter ↵
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+
+                {/* Footer Controls */}
+                <div
+                  style={{
+                    padding: '8px 16px 4px 16px',
+                    fontSize: 8.5,
+                    fontFamily: 'var(--font-mono)',
+                    color: 'rgba(255, 255, 255, 0.3)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.04)',
+                    marginTop: 4,
+                    paddingTop: 8
+                  }}
+                >
+                  <span>↑↓ Navigate</span>
+                  <span>Esc Close</span>
+                </div>
+              </div>
+            )}
             {activeTabObj?.url.startsWith('https://') && (
               <span
                 style={{
@@ -894,7 +1690,7 @@ function App(): React.JSX.Element {
             {currentZoom !== 1 && (
               <button
                 type="button"
-                title="Reset zoom (Cmd+0)"
+                title="Reset zoom (Cmd+E)"
                 onClick={() => {
                   if (activeTabId) {
                     setTabZoom(activeTabId, 1)
@@ -938,6 +1734,16 @@ function App(): React.JSX.Element {
             onClick={handleViewSource}
           >
             <Code size={16} />
+          </button>
+
+          {/* Split screen viewer */}
+          <button
+            className="nav-circle-btn"
+            title={isSplitActive ? "Exit Split View" : "Split View Tabs"}
+            style={{ color: isSplitActive ? 'var(--bg-accent)' : 'inherit' }}
+            onClick={handleToggleSplit}
+          >
+            <Columns2 size={16} />
           </button>
 
           <div style={{ width: 1, height: 20, backgroundColor: 'var(--border-color)' }} />
@@ -1070,7 +1876,9 @@ function App(): React.JSX.Element {
                   style={{ paddingRight: 4 }}
                 >
                   {/* Favicon */}
-                  {tab.favicon ? (
+                  {tab.isPrivate ? (
+                    <Shield size={12} style={{ color: '#ff006e', flexShrink: 0 }} />
+                  ) : tab.favicon ? (
                     <img
                       src={tab.favicon}
                       alt=""
@@ -1080,23 +1888,23 @@ function App(): React.JSX.Element {
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                     />
                   ) : (
-                    <span style={{ fontSize: 10, flexShrink: 0 }}>🌐</span>
+                    <Globe size={12} style={{ flexShrink: 0, opacity: 0.8 }} />
                   )}
-                  {tab.isPinned && <span style={{ fontSize: 9, opacity: 0.7, flexShrink: 0 }}>📌</span>}
-                  <span className="tab-title-text">{tab.title}</span>
+                  {tab.isPinned && <Pin size={10} style={{ opacity: 0.8, flexShrink: 0, marginLeft: 4 }} />}
+                  <span className="tab-title-text" style={{ marginLeft: 6 }}>{tab.title}</span>
                   <button
                     className="tab-close-btn"
                     title={tab.isPinned ? 'Unpin' : 'Pin'}
-                    style={{ marginLeft: 'auto', opacity: 0.5 }}
+                    style={{ marginLeft: 'auto', opacity: 0.5, display: 'flex', alignItems: 'center' }}
                     onClick={(e) => { e.stopPropagation(); store.togglePinTab(tab.id) }}
                   >
-                    <span style={{ fontSize: 9 }}>{tab.isPinned ? '📌' : '⊙'}</span>
+                    {tab.isPinned ? <PinOff size={10} /> : <Pin size={10} />}
                   </button>
                   <button
                     className="tab-close-btn"
                     onClick={(e) => {
                       e.stopPropagation()
-                      closeTab(tab.id)
+                      handleCloseTab(tab.id)
                     }}
                   >
                     <X size={10} />
@@ -1108,96 +1916,505 @@ function App(): React.JSX.Element {
 
           {/* WebView and Horizontal Bar Grid */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            {/* Horizontal Tabs Strip (Default) */}
+            {/* Horizontal Tabs Strip with actions toolbar (Default) */}
             {tabLayout === 'horizontal' && (
-              <div className="tab-bar-horizontal scroller">
-                {sortedWorkspaceTabs.map((tab: any) => (
-                  <div
-                    key={tab.id}
-                    className={`horizontal-tab ${tab.active ? 'active' : ''}`}
-                    onClick={() => setActiveTab(tab.id)}
-                    style={{
-                      borderTop: tab.isPinned ? '2px solid var(--bg-accent)' : '2px solid transparent'
+              <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', height: 'var(--tabbar-h)', position: 'relative', zIndex: 15 }}>
+                <div className="tab-bar-horizontal" style={{ flex: 1, borderBottom: 'none', padding: '0 0 0 16px' }}>
+                  {sortedWorkspaceTabs.map((tab: any) => {
+                    const isPinned = tab.isPinned
+                    return (
+                      <div
+                        key={tab.id}
+                        className={`horizontal-tab ${tab.active ? 'active' : ''} ${isPinned ? 'pinned' : ''}`}
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{
+                          width: isPinned ? '36px' : 'auto',
+                          minWidth: isPinned ? '36px' : '110px',
+                          maxWidth: isPinned ? '36px' : '180px',
+                          justifyContent: isPinned ? 'center' : 'flex-start',
+                          padding: isPinned ? '0' : '0 10px 0 12px'
+                        }}
+                        title={tab.title}
+                      >
+                        {/* Favicon / Hover Unpin Container */}
+                        <div
+                          style={{
+                            position: 'relative',
+                            width: 13,
+                            height: 13,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}
+                          className="tab-favicon-container"
+                        >
+                          {tab.isPrivate ? (
+                            <Shield size={13} className="tab-favicon-img" style={{ color: '#ff006e', flexShrink: 0 }} />
+                          ) : tab.favicon ? (
+                            <img
+                              src={tab.favicon}
+                              alt=""
+                              width={13}
+                              height={13}
+                              className="tab-favicon-img"
+                              style={{ borderRadius: 2, flexShrink: 0, objectFit: 'contain' }}
+                              onError={(e) => {
+                                ;(e.target as HTMLImageElement).style.display = 'none'
+                              }}
+                            />
+                          ) : (
+                            <Globe size={13} className="tab-favicon-img" style={{ flexShrink: 0, opacity: 0.8 }} />
+                          )}
+                          {isPinned && (
+                            <button
+                              className="tab-pinned-unpin-btn"
+                              title="Unpin Tab"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                store.togglePinTab(tab.id)
+                              }}
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                background: 'var(--bg-tertiary)',
+                                border: 'none',
+                                borderRadius: 2,
+                                display: 'none',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                color: 'var(--bg-accent)',
+                                padding: 0
+                              }}
+                            >
+                              <PinOff size={10} />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Title text - Hidden on pinned tabs */}
+                        {!isPinned && (
+                          <span className="tab-title-text" style={{ marginLeft: 6 }}>
+                            {tab.title}
+                          </span>
+                        )}
+
+                        {/* Action buttons (only for unpinned tabs) */}
+                        {!isPinned && (
+                          <>
+                            {/* Pin Button */}
+                            <button
+                              className="tab-action-btn"
+                              title="Pin Tab"
+                              style={{ marginLeft: 'auto', marginRight: 2 }}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                store.togglePinTab(tab.id)
+                              }}
+                            >
+                              <Pin size={10} />
+                            </button>
+
+                            {/* Close Button */}
+                            <button
+                              className="tab-action-btn"
+                              title="Close Tab"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleCloseTab(tab.id)
+                              }}
+                            >
+                              <X size={10} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )
+                  })}
+
+                  <button
+                    className="nav-circle-btn"
+                    style={{ width: 24, height: 24, alignSelf: 'center', marginLeft: 4, flexShrink: 0 }}
+                    onClick={() => addTab('New Tab', 'aether://home')}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+
+                {/* Fixed Tabs Toolbar */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 16px 0 8px', height: '100%', flexShrink: 0, position: 'relative' }}>
+                  {/* Search Open Tabs Button */}
+                  <button
+                    className="nav-circle-btn"
+                    style={{ width: 26, height: 26 }}
+                    title="Search Open Tabs"
+                    onClick={() => {
+                      setShowTabSearch(!showTabSearch)
+                      setShowTabMenu(false)
+                      setTabSearchQuery('')
                     }}
                   >
-                    {/* Favicon */}
-                    {tab.favicon ? (
-                      <img
-                        src={tab.favicon}
-                        alt=""
-                        width={13}
-                        height={13}
-                        style={{ borderRadius: 2, flexShrink: 0, objectFit: 'contain' }}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                      />
-                    ) : (
-                      <span style={{ fontSize: 10, flexShrink: 0, lineHeight: 1 }}>🌐</span>
-                    )}
-                    <span className="tab-title-text">{tab.title}</span>
-                    {/* Pin/Unpin button */}
-                    <button
-                      className="tab-close-btn"
-                      title={tab.isPinned ? 'Unpin tab' : 'Pin tab'}
-                      style={{ opacity: 0.5, fontSize: 9, padding: '0 1px' }}
-                      onClick={(e) => { e.stopPropagation(); store.togglePinTab(tab.id) }}
-                    >
-                      {tab.isPinned ? '📌' : '⊙'}
-                    </button>
-                    <button
-                      className="tab-close-btn"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        closeTab(tab.id)
+                    <Search size={14} />
+                  </button>
+
+                  {/* Quick Private Tab Button */}
+                  <button
+                    className="nav-circle-btn"
+                    style={{ width: 26, height: 26 }}
+                    title="New Private Tab"
+                    onClick={() => addTab('Private Tab', 'aether://home', true)}
+                  >
+                    <Shield size={14} style={{ color: '#2ec4b6' }} />
+                  </button>
+
+                  {/* Tab Actions Menu Button */}
+                  <button
+                    className="nav-circle-btn"
+                    style={{ width: 26, height: 26 }}
+                    title="Tab Actions"
+                    onClick={() => {
+                      setShowTabMenu(!showTabMenu)
+                      setShowTabSearch(false)
+                    }}
+                  >
+                    <ChevronDown size={14} />
+                  </button>
+
+                  {/* Tab Search Overlay Popover */}
+                  {showTabSearch && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: 16,
+                        top: 36,
+                        width: 280,
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 8,
+                        boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
+                        zIndex: 110,
+                        padding: 8,
+                        backdropFilter: 'blur(8px)',
                       }}
                     >
-                      <X size={10} />
-                    </button>
-                  </div>
-                ))}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, borderBottom: '1px solid var(--border-color)', paddingBottom: 6, marginBottom: 6 }}>
+                        <Search size={12} style={{ color: 'var(--text-secondary)' }} />
+                        <input
+                          type="text"
+                          placeholder="Search open tabs..."
+                          style={{
+                            flex: 1,
+                            border: 'none',
+                            background: 'transparent',
+                            color: 'var(--text-primary)',
+                            fontSize: 12,
+                            outline: 'none',
+                          }}
+                          value={tabSearchQuery}
+                          onChange={(e) => setTabSearchQuery(e.target.value)}
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => setShowTabSearch(false)}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: 2 }}
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                      <div style={{ maxHeight: 200, overflowY: 'auto' }} className="scroller">
+                        {workspaceTabs
+                          .filter((t: Tab) => t.title.toLowerCase().includes(tabSearchQuery.toLowerCase()) || t.url.toLowerCase().includes(tabSearchQuery.toLowerCase()))
+                          .map((t: Tab) => (
+                            <div
+                              key={t.id}
+                              onClick={() => {
+                                setActiveTab(t.id)
+                                setShowTabSearch(false)
+                              }}
+                              style={{
+                                padding: '6px 8px',
+                                borderRadius: 4,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                              }}
+                              className="notes-list-item"
+                            >
+                              {t.isPrivate ? <Shield size={11} style={{ color: '#2ec4b6' }} /> : <Globe size={11} />}
+                              <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
+                                <span style={{ fontSize: 11, fontWeight: t.active ? 600 : 400, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {t.title}
+                                </span>
+                                <span style={{ fontSize: 9, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {t.url}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        {workspaceTabs.filter((t: Tab) => t.title.toLowerCase().includes(tabSearchQuery.toLowerCase()) || t.url.toLowerCase().includes(tabSearchQuery.toLowerCase())).length === 0 && (
+                          <div style={{ padding: '12px 8px', textAlign: 'center', fontSize: 11, color: 'var(--text-secondary)' }}>
+                            No matching tabs
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
-                <button
-                  className="nav-circle-btn"
-                  style={{ width: 24, height: 24, alignSelf: 'center', marginLeft: 4, flexShrink: 0 }}
-                  onClick={() => addTab('New Tab', 'aether://home')}
-                >
-                  <Plus size={14} />
-                </button>
+                  {/* Tab Actions Dropdown Menu */}
+                  {showTabMenu && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: 16,
+                        top: 36,
+                        width: 240,
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 12,
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+                        zIndex: 110,
+                        padding: 6,
+                        backdropFilter: 'blur(16px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2
+                      }}
+                    >
+                      {/* 1. Reopen last closed tab */}
+                      <div
+                        onClick={() => {
+                          if (lastClosedTabs.length > 0) {
+                            handleReopenLastClosedTab()
+                            setShowTabMenu(false)
+                          }
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: '8px 12px',
+                          borderRadius: 8,
+                          cursor: lastClosedTabs.length > 0 ? 'pointer' : 'not-allowed',
+                          opacity: lastClosedTabs.length > 0 ? 1 : 0.45,
+                          transition: 'all 0.2s',
+                        }}
+                        className={lastClosedTabs.length > 0 ? "notes-list-item" : ""}
+                      >
+                        <RotateCcw size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                          <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>Reopen Closed Tab</span>
+                          {lastClosedTabs.length > 0 && (
+                            <span style={{ fontSize: 9, color: 'var(--text-secondary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', marginTop: 1 }}>
+                              {lastClosedTabs[0].title}
+                            </span>
+                          )}
+                        </div>
+                        <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', opacity: 0.7, padding: '1px 4px', background: 'var(--bg-tertiary)', borderRadius: 4 }}>
+                          ⌘⇧T
+                        </span>
+                      </div>
+
+                      <div style={{ height: 1, backgroundColor: 'var(--border-color)', margin: '4px 6px' }} />
+
+                      {/* 2. Close Other Tabs */}
+                      <div
+                        onClick={() => {
+                          handleCloseOtherTabs()
+                          setShowTabMenu(false)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: '8px 12px',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                        className="notes-list-item"
+                      >
+                        <X size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+                        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)', flex: 1 }}>
+                          Close Other Tabs
+                        </span>
+                      </div>
+
+                      {/* 3. Close All Tabs */}
+                      <div
+                        onClick={() => {
+                          handleCloseAllTabs()
+                          setShowTabMenu(false)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: '8px 12px',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                        className="notes-list-item"
+                      >
+                        <Trash2 size={14} style={{ color: '#ef233c', flexShrink: 0 }} />
+                        <span style={{ fontSize: 12, fontWeight: 500, color: '#ef233c', flex: 1 }}>
+                          Close All Tabs
+                        </span>
+                      </div>
+
+                      <div style={{ height: 1, backgroundColor: 'var(--border-color)', margin: '4px 6px' }} />
+
+                      {/* 4. Sort Tabs by Title */}
+                      <div
+                        onClick={() => {
+                          handleSortTabs('title')
+                          setShowTabMenu(false)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: '8px 12px',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                        className="notes-list-item"
+                      >
+                        <ArrowUpDown size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+                        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)', flex: 1 }}>
+                          Sort Tabs by Title
+                        </span>
+                      </div>
+
+                      {/* 5. Sort Tabs by URL */}
+                      <div
+                        onClick={() => {
+                          handleSortTabs('url')
+                          setShowTabMenu(false)
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: '8px 12px',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                        className="notes-list-item"
+                      >
+                        <Globe size={14} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
+                        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)', flex: 1 }}>
+                          Sort Tabs by URL
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Render webviews with display:none for hidden running pages */}
-            <div className="webview-container">
-              {workspaceTabs.map((tab: Tab) => {
-                const isLoaded = loadedTabIds.includes(tab.id)
-                if (!isLoaded) return null
+            <div className="webview-container" ref={containerRef}>
+              {(() => {
+                const visibleTabs = workspaceTabs.filter((t: Tab) => t.id === activeTabId || (isSplitActive && t.id === splitTabId))
+                const elements: React.ReactNode[] = []
 
-                const isHome =
-                  tab.url === 'aether://home' || tab.url === 'about:blank' || tab.url === ''
+                workspaceTabs.forEach((tab: Tab) => {
+                  const isLoaded = loadedTabIds.includes(tab.id)
+                  if (!isLoaded) return
 
-                return (
-                  <div
-                    key={tab.id}
-                    style={{
-                      display: activeTabId === tab.id ? 'flex' : 'none',
-                      width: '100%',
-                      height: '100%',
-                      flexDirection: 'column',
-                      overflow: 'hidden'
-                    }}
-                  >
-                    {isHome ? (
-                      <StartPage tabId={tab.id} />
-                    ) : (
-                      <webview
-                        ref={(ref) => setupWebviewListeners(tab.id, ref)}
-                        src={tab.url}
-                        partition={`persist:${activeProfileId}`} // Profile isolated session cookies
-                        allowpopups={true}
-                      />
-                    )}
-                  </div>
-                )
-              })}
+                  const isHome =
+                    tab.url === 'aether://home' || tab.url === 'about:blank' || tab.url === ''
+
+                  const isLeftSplitPane = isSplitActive && visibleTabs[0]?.id === tab.id
+                  const isRightSplitPane = isSplitActive && visibleTabs[1]?.id === tab.id
+
+                  let flexStyle = '1 1 0%'
+                  if (isSplitActive) {
+                    if (isLeftSplitPane) {
+                      flexStyle = `${splitRatio} 1 0%`
+                    } else if (isRightSplitPane) {
+                      flexStyle = `${1 - splitRatio} 1 0%`
+                    }
+                  }
+
+                  const paneEl = (
+                    <div
+                      key={tab.id}
+                      onMouseDownCapture={() => {
+                        if (isSplitActive && tab.id !== activeTabId) {
+                          const prevActive = activeTabId
+                          store.setActiveTab(tab.id)
+                          setSplitTabId(prevActive)
+                        }
+                      }}
+                      style={{
+                        display: activeTabId === tab.id || (isSplitActive && splitTabId === tab.id) ? 'flex' : 'none',
+                        flex: flexStyle,
+                        height: '100%',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        boxShadow: isSplitActive && activeTabId === tab.id ? 'inset 0 0 0 2px var(--bg-accent)' : 'none',
+                        position: 'relative',
+                        pointerEvents: isResizing ? 'none' : 'auto'
+                      }}
+                    >
+                      {isHome ? (
+                        <StartPage tabId={tab.id} />
+                      ) : (
+                        <webview
+                          ref={(ref) => setupWebviewListeners(tab.id, ref)}
+                          src={tab.url}
+                          partition={tab.isPrivate ? `persist:private-${tab.id}` : `persist:${activeProfileId}`} // Profile or private isolated session cookies
+                          allowpopups={true}
+                        />
+                      )}
+                    </div>
+                  )
+
+                  elements.push(paneEl)
+
+                  if (isSplitActive && isLeftSplitPane) {
+                    elements.push(
+                      <div
+                        key="split-resizer"
+                        onMouseDown={handleResizeMouseDown}
+                        style={{
+                          width: 8,
+                          height: '100%',
+                          cursor: 'col-resize',
+                          flexShrink: 0,
+                          zIndex: 20,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: isResizing ? 'rgba(131,56,236,0.1)' : 'transparent',
+                          transition: 'background-color 0.2s',
+                          margin: '0 -4px'
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 2,
+                            height: '100%',
+                            backgroundColor: isResizing ? 'var(--bg-accent)' : 'var(--border-color)',
+                            transition: 'background-color 0.2s'
+                          }}
+                        />
+                      </div>
+                    )
+                  }
+                })
+
+                return elements
+              })()}
 
               {/* ============================================================== */}
               {/* 5. READING MODE ARTICLE OVERLAY                                */}

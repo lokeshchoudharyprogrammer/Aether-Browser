@@ -250,6 +250,13 @@ function createAppMenu(): void {
           click: () => {
             mainWindow?.webContents.send('shortcut-close-tab')
           }
+        },
+        {
+          label: 'New Private Window',
+          accelerator: 'CmdOrCtrl+P',
+          click: () => {
+            mainWindow?.webContents.send('shortcut-new-private')
+          }
         }
       ]
     },
@@ -285,6 +292,35 @@ function createAppMenu(): void {
           click: () => {
             mainWindow?.webContents.send('shortcut-focus-address')
           }
+        },
+        {
+          label: 'Toggle Notes Panel',
+          accelerator: 'CmdOrCtrl+N',
+          click: () => {
+            mainWindow?.webContents.send('shortcut-toggle-notes')
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Zoom In',
+          accelerator: 'CmdOrCtrl+I',
+          click: () => {
+            mainWindow?.webContents.send('shortcut-zoom-in')
+          }
+        },
+        {
+          label: 'Zoom Out',
+          accelerator: 'CmdOrCtrl+O',
+          click: () => {
+            mainWindow?.webContents.send('shortcut-zoom-out')
+          }
+        },
+        {
+          label: 'Reset Zoom',
+          accelerator: 'CmdOrCtrl+E',
+          click: () => {
+            mainWindow?.webContents.send('shortcut-zoom-reset')
+          }
         }
       ]
     },
@@ -293,19 +329,19 @@ function createAppMenu(): void {
       submenu: [
         {
           label: 'Lock Profile',
-          accelerator: 'CmdOrCtrl+Shift+L',
+          accelerator: 'CmdOrCtrl+K',
           click: () => {
             mainWindow?.webContents.send('shortcut-lock-profile')
           }
         },
         { type: 'separator' },
-        ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => ({
-          label: `Switch to Workspace ${num}`,
-          accelerator: `CmdOrCtrl+Shift+${num}`,
+        {
+          label: 'Cycle Workspaces',
+          accelerator: 'CmdOrCtrl+G',
           click: () => {
-            mainWindow?.webContents.send('shortcut-switch-workspace', num)
+            mainWindow?.webContents.send('shortcut-cycle-workspace')
           }
-        }))
+        }
       ]
     },
     {
@@ -407,6 +443,21 @@ app.whenReady().then(() => {
   // Password decryption IPCs
   ipcMain.handle('decrypt-pwd', (_, encrypted, key) => {
     return decryptPassword(encrypted, key)
+  })
+
+  // Search suggestions IPC
+  ipcMain.handle('get-search-suggestions', async (_, query: string) => {
+    try {
+      const response = await fetch(
+        `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`
+      )
+      if (!response.ok) return []
+      const data = (await response.json()) as any
+      return (data && data[1]) || []
+    } catch (error) {
+      console.error('Error fetching search suggestions:', error)
+      return []
+    }
   })
 
   // DevTools IPC
