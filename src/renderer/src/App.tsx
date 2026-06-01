@@ -226,6 +226,35 @@ const getErrorPageHtml = (url: string, errorDescription: string, errorCode: numb
   `;
 };
 
+interface TabWebViewProps {
+  id: string
+  initialUrl: string
+  isPrivate: boolean
+  activeProfileId: string
+  setupWebviewListeners: (id: string, ref: any) => void
+}
+
+const TabWebView = React.memo(
+  ({ id, initialUrl, isPrivate, activeProfileId, setupWebviewListeners }: TabWebViewProps) => {
+    return (
+      <webview
+        ref={(ref) => setupWebviewListeners(id, ref)}
+        src={initialUrl}
+        partition={isPrivate ? `persist:private-${id}` : `persist:${activeProfileId}`}
+        allowpopups={true}
+      />
+    )
+  },
+  (prevProps, nextProps) => {
+    // Skip re-rendering if properties that don't change the underlying partition or key remain the same
+    return (
+      prevProps.id === nextProps.id &&
+      prevProps.activeProfileId === nextProps.activeProfileId &&
+      prevProps.isPrivate === nextProps.isPrivate
+    )
+  }
+)
+
 function App(): React.JSX.Element {
   const store = useBrowserStore()
   const {
@@ -2434,11 +2463,12 @@ function App(): React.JSX.Element {
                       {isHome ? (
                         <StartPage tabId={tab.id} />
                       ) : (
-                        <webview
-                          ref={(ref) => setupWebviewListeners(tab.id, ref)}
-                          src={tab.url}
-                          partition={tab.isPrivate ? `persist:private-${tab.id}` : `persist:${activeProfileId}`} // Profile or private isolated session cookies
-                          allowpopups={true}
+                        <TabWebView
+                          id={tab.id}
+                          initialUrl={tab.url}
+                          isPrivate={!!tab.isPrivate}
+                          activeProfileId={activeProfileId || ''}
+                          setupWebviewListeners={setupWebviewListeners}
                         />
                       )}
                     </div>
