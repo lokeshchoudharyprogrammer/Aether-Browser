@@ -25,6 +25,14 @@ A workspace is defined by:
 - **Tabs List**: Ordered array of serialized tab state objects.
 - **Active Tab Index**: The tab currently focused when this workspace is loaded.
 
+### Horizontal Tab & Pinned Tabs UI Layout
+
+The horizontal tab bar contains standard tabs and pinned tabs styled as modern, professional components:
+
+1. **Active Accent Stripe**: Active tabs render with a glowing indicator bottom border/stripe matching the active workspace/profile theme context.
+2. **Compact Pinned Tabs**: Pinned tabs automatically shrink to compact `36px` width capsules, hiding the text title and the close button to conserve horizontal space.
+3. **Hover Unpin Toggle**: When a user hovers over a pinned tab, the tab's favicon is swapped with a dynamic unpin icon (`PinOff` from Lucide). Clicking this icon triggers the unpin transition.
+
 ---
 
 ## 2. Tab State Serialization

@@ -58,16 +58,23 @@ graph TD
 
 ---
 
-## 3. Profile Lifecycle Management
+## 3. Profile Lifecycle Management & User Interface
 
-When a user launches Project Atlas, they are greeted by a profile selection screen. The lifecycle behaves as follows:
+When a user launches Project Atlas, they are greeted by a **full-screen, modal-free profile selection landing dashboard**. This layout replaces standard floating card modals with a spacious, immersive UI that uses radial dark gradient vignettes.
+
+### UI Design Guidelines:
+1. **Clean Minimalist Theme**: Replaces colorful high-contrast gradients with clean, dark-mode styling inspired by modern professional tools.
+2. **Metadata Indicators**: Instead of raw text lists, metadata counters (like workspaces and bookmarks) are shown inline with crisp, dedicated icons (e.g. `Layers` and `Bookmark` from Lucide).
+3. **Modal-Free Navigation**: Creation, switching, and password/PIN locking of profiles are performed inline within the dashboard, avoiding overlay popups to ensure a smooth transition flow.
+
+The lifecycle behaves as follows:
 
 ```mermaid
 stateDiagram-v2
     [*] --> Startup: Load master.db
-    Startup --> ProfileSelector: Present Profile Cards
+    Startup --> ProfileSelector: Present Profile Landing Dashboard (Modal-Free)
     ProfileSelector --> LockVerification: Profile selected
-    LockVerification --> DecryptDatabase: If Locked (Argon2id + Password)
+    LockVerification --> DecryptDatabase: If Locked (Argon2id + Password/PIN)
     LockVerification --> ActiveSession: If Unlocked
     DecryptDatabase --> ActiveSession: Decryption Successful
     DecryptDatabase --> LockVerification: Failed verification

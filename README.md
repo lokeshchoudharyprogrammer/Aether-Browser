@@ -47,12 +47,15 @@ It's designed for developers, power users, and privacy-conscious users who need 
 ### 🔐 Multi-Profile System
 - Create unlimited isolated profiles (Developer, Personal, Client, etc.)
 - Each profile has its own: cookies · cache · history · bookmarks · notes · workspaces
+- **Sleek Landing Dashboard** — Access workspaces via a modal-free, full-screen profile selection flow with radial gradient vignettes
 - **PIN-locked profiles** — lock any profile with a numeric PIN code
 - **Profile avatar** system with emoji/icon selection
 
-### 🗂️ Workspaces
+### 🗂️ Workspaces & Tab System
 - Organize tabs into named workspaces inside each profile
 - Switch between workspaces instantly without losing tab state
+- **Compact Pinned Tabs** — Pinned tabs automatically collapse to a small size (36px width), hiding title text and close buttons
+- **Hover Unpin Toggle** — Hovering over a pinned tab swaps the favicon with a clickable unpin icon
 - Create, rename, and delete workspaces per profile
 
 ### 🛡️ Built-in Ad Blocker
@@ -83,8 +86,9 @@ It's designed for developers, power users, and privacy-conscious users who need 
 - CSS variable based theming — easy to extend and customize
 - Monospace developer aesthetic inspired by VS Code / Arc Browser
 
-### 🌐 Smart URL Bar
+### 🌐 Smart URL Bar & Suggestions
 - Detects URLs vs search queries automatically
+- **Live Autocomplete Suggestions** — Displays a debounced, premium suggestions dropdown on both the Start Page and the top address bar with full keyboard arrow-key navigation support
 - Supports Google, DuckDuckGo, and Bing as search engines
 - Switch search engine per-session from the new tab page
 

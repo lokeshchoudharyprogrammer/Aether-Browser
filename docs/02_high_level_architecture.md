@@ -62,41 +62,55 @@ To communicate with the Main process safely, the Renderer utilizes a **Preload S
 // src/preload/index.ts
 import { contextBridge, ipcRenderer } from 'electron'
 
-contextBridge.exposeInMainWorld('atlasAPI', {
-  send: (channel: string, data: any) => {
-    // Whitelist outgoing channels
-    const validChannels = ['toMain:open-tab', 'toMain:update-settings', 'toMain:switch-profile']
-    if (validChannels.includes(channel)) {
-      ipcRenderer.send(channel, data)
-    }
+const api = {
+  getDb: () => ipcRenderer.invoke('db-get'),
+  saveDb: (db: any) => ipcRenderer.invoke('db-save', db),
+  verifyProfileLock: (profileId: string, code: string) =>
+    ipcRenderer.invoke('auth-profile', profileId, code),
+  encryptPassword: (password: string, key: string) =>
+    ipcRenderer.invoke('encrypt-pwd', password, key),
+  decryptPassword: (encrypted: string, key: string) =>
+    ipcRenderer.invoke('decrypt-pwd', encrypted, key),
+  openDevTools: (profileId: string) => ipcRenderer.send('open-devtools', profileId),
+  onAdBlocked: (callback: (event: any, data: { count: number; url: string }) => void) => {
+    ipcRenderer.on('ad-blocked', callback)
+    return () => ipcRenderer.removeListener('ad-blocked', callback)
   },
-  invoke: async (channel: string, data: any): Promise<any> => {
-    // Whitelist bi-directional channels
-    const validChannels = [
-      'invokeMain:get-history',
-      'invokeMain:lock-profile',
-      'invokeMain:decrypt-vault'
-    ]
-    if (validChannels.includes(channel)) {
-      return await ipcRenderer.invoke(channel, data)
-    }
+  onDownloadProgress: (
+    callback: (
+      event: any,
+      data: { id: string; progress: number; speed: string; received: number; total: number }
+    ) => void
+  ) => {
+    ipcRenderer.on('download-progress', callback)
+    return () => ipcRenderer.removeListener('download-progress', callback)
   },
-  receive: (channel: string, func: (...args: any[]) => void) => {
-    // Whitelist incoming channels
-    const validChannels = [
-      'fromMain:tab-loaded',
-      'fromMain:ad-blocked-count',
-      'fromMain:profile-locked'
-    ]
-    if (validChannels.includes(channel)) {
-      const subscription = (_event: any, ...args: any[]) => func(...args)
-      ipcRenderer.on(channel, subscription)
-      return () => {
-        ipcRenderer.removeListener(channel, subscription)
-      }
-    }
-  }
-})
+  onDownloadFinished: (
+    callback: (
+      event: any,
+      data: { id: string; status: 'completed' | 'failed' | 'cancelled'; path?: string }
+    ) => void
+  ) => {
+    ipcRenderer.on('download-finished', callback)
+    return () => ipcRenderer.removeListener('download-finished', callback)
+  },
+  cancelDownload: (id: string) => ipcRenderer.send('cancel-download', id),
+  pauseDownload: (id: string) => ipcRenderer.send('pause-download', id),
+  resumeDownload: (id: string) => ipcRenderer.send('resume-download', id),
+  triggerDownload: (url: string, profileId: string) =>
+    ipcRenderer.send('trigger-download', url, profileId),
+  onShortcut: (channel: string, callback: (event: any, ...args: any[]) => void) => {
+    ipcRenderer.on(channel, callback)
+    return () => ipcRenderer.removeListener(channel, callback)
+  },
+  
+  // Live autocomplete search suggestions channel
+  getSearchSuggestions: (query: string) => ipcRenderer.invoke('get-search-suggestions', query)
+}
+
+if (process.contextIsolated) {
+  contextBridge.exposeInMainWorld('api', api)
+}
 ```
 
 ---
