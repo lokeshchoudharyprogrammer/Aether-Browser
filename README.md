@@ -88,6 +88,7 @@ It's designed for developers, power users, and privacy-conscious users who need 
 
 ### 🌐 Smart URL Bar & Suggestions
 - Detects URLs vs search queries automatically
+- **Search Shield (Anonymous Search Mode)** — Toggleable privacy shield (active by default) that routes Google searches anonymously through Startpage proxy servers (Google results with zero tracking) and queries autocomplete suggestions via DuckDuckGo's tracking-free API. Google never knows your IP, country, identity, or search keystrokes.
 - **Live Autocomplete Suggestions** — Displays a debounced, premium suggestions dropdown on both the Start Page and the top address bar with full keyboard arrow-key navigation support
 - Supports Google, DuckDuckGo, and Bing as search engines
 - Switch search engine per-session from the new tab page

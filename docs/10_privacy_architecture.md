@@ -116,3 +116,14 @@ graph LR
 4. **Browsing Time Saved**: Estimating average connection delays:
    $$\text{Time Saved (Seconds)} = \text{Blocked Requests} \times 0.08 \text{ seconds}$$
 5. **Privacy Score**: A dynamically calculated score (0-100) per domain based on HTTPS enforcement, the ratio of trackers to total requests loaded, and standard security headers detected.
+
+---
+
+## 5. Search Shield (Anonymous Search Engine Routing)
+
+To prevent search engine tracking, Project Atlas features a dynamic **Search Shield** toggle in the primary toolbar. When active, it anonymizes the search workflow:
+
+### Workflow Details:
+1. **Search Query Routing**: Any query directed to Google is dynamically intercepted and rerouted to **Startpage** (`https://www.startpage.com/sp/search?query=...`). Startpage functions as a privacy proxy: it queries Google on its own servers, strips tracking parameters, and returns Google's actual search results without exposing the user's public IP address, location, cookies, or browser fingerprints.
+2. **Keystroke Autocomplete Anonymization**: When the user types in the address bar or Start Page search box, suggestions are queried using **DuckDuckGo's tracking-free suggestions API** (`https://ac.duckduckgo.com/ac/`). Keystroke data is never sent to Google suggest servers.
+3. **Header Stripping**: The application main process strips all tracking and identifying headers (e.g. cookies, correlation IDs) during suggestion queries, ensuring search history cannot be linked to the user's session.

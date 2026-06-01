@@ -446,11 +446,18 @@ app.whenReady().then(() => {
   })
 
   // Search suggestions IPC
-  ipcMain.handle('get-search-suggestions', async (_, query: string) => {
+  ipcMain.handle('get-search-suggestions', async (_, query: string, shield?: boolean) => {
     try {
-      const response = await fetch(
-        `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`
-      )
+      const url = shield
+        ? `https://ac.duckduckgo.com/ac/?q=${encodeURIComponent(query)}&type=list`
+        : `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`
+
+      const response = await fetch(url, {
+        headers: {
+          // Send no identifying cookies or correlation headers
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      })
       if (!response.ok) return []
       const data = (await response.json()) as any
       return (data && data[1]) || []

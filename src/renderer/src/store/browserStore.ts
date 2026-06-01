@@ -101,6 +101,7 @@ interface BrowserStore {
   viewSourceActive: boolean
   viewJsonActive: boolean
   jsonContent: any | null
+  searchShieldEnabled: boolean
 
   // Core functions
   init: () => Promise<void>
@@ -176,6 +177,7 @@ interface BrowserStore {
   setReadingMode: (active: boolean, content?: { title: string; body: string }) => void
   setViewSource: (active: boolean) => void
   setViewJson: (active: boolean, content?: any) => void
+  toggleSearchShield: () => void
 
   // Downloads updates
   updateDownload: (id: string, updates: Partial<DownloadItem>) => void
@@ -196,6 +198,7 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
   viewSourceActive: false,
   viewJsonActive: false,
   jsonContent: null,
+  searchShieldEnabled: true,
 
   init: async () => {
     const db = await window.api.getDb()
@@ -818,6 +821,10 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
       viewJsonActive: active,
       jsonContent: active && content ? content : null
     })
+  },
+
+  toggleSearchShield: () => {
+    set((state) => ({ searchShieldEnabled: !state.searchShieldEnabled }))
   },
 
   // Downloads tracking

@@ -43,7 +43,8 @@ const api = {
     ipcRenderer.on(channel, callback)
     return () => ipcRenderer.removeListener(channel, callback)
   },
-  getSearchSuggestions: (query: string) => ipcRenderer.invoke('get-search-suggestions', query)
+  getSearchSuggestions: (query: string, shield?: boolean) =>
+    ipcRenderer.invoke('get-search-suggestions', query, shield)
 }
 
 if (process.contextIsolated) {

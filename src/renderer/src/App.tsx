@@ -275,11 +275,13 @@ function App(): React.JSX.Element {
     const handler = setTimeout(async () => {
       try {
         if (window.api && typeof window.api.getSearchSuggestions === 'function') {
-          const res = await window.api.getSearchSuggestions(trimmed)
+          const res = await window.api.getSearchSuggestions(trimmed, store.searchShieldEnabled)
           setTopSuggestions((res || []).slice(0, 5))
         } else {
           const response = await fetch(
-            `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(trimmed)}`
+            store.searchShieldEnabled
+              ? `https://ac.duckduckgo.com/ac/?q=${encodeURIComponent(trimmed)}&type=list`
+              : `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(trimmed)}`
           )
           if (response.ok) {
             const data = await response.json()
@@ -317,7 +319,9 @@ function App(): React.JSX.Element {
             if (url.includes('.') && !url.includes(' ')) {
               url = 'https://' + url
             } else {
-              url = 'https://www.google.com/search?q=' + encodeURIComponent(url)
+              url = store.searchShieldEnabled
+                ? 'https://www.startpage.com/sp/search?query=' + encodeURIComponent(url)
+                : 'https://www.google.com/search?q=' + encodeURIComponent(url)
             }
           }
 
@@ -858,7 +862,9 @@ function App(): React.JSX.Element {
       if (url.includes('.') && !url.includes(' ')) {
         url = 'https://' + url
       } else {
-        url = 'https://www.google.com/search?q=' + encodeURIComponent(url)
+        url = store.searchShieldEnabled
+          ? 'https://www.startpage.com/sp/search?query=' + encodeURIComponent(url)
+          : 'https://www.google.com/search?q=' + encodeURIComponent(url)
       }
     }
 
@@ -1591,7 +1597,9 @@ function App(): React.JSX.Element {
                           if (url.includes('.') && !url.includes(' ')) {
                             url = 'https://' + url
                           } else {
-                            url = 'https://www.google.com/search?q=' + encodeURIComponent(url)
+                            url = store.searchShieldEnabled
+                              ? 'https://www.startpage.com/sp/search?query=' + encodeURIComponent(url)
+                              : 'https://www.google.com/search?q=' + encodeURIComponent(url)
                           }
                         }
                         updateTabUrl(activeTabId || '', url, url)
@@ -1715,6 +1723,31 @@ function App(): React.JSX.Element {
               </button>
             )}
           </form>
+
+          {/* Search Shield (Anonymous Search) */}
+          <button
+            className="nav-circle-btn"
+            title={store.searchShieldEnabled ? "Search Shield: ACTIVE (Google results via anonymous proxy)" : "Search Shield: INACTIVE"}
+            style={{
+              color: store.searchShieldEnabled ? '#2ec4b6' : 'var(--text-secondary)',
+              position: 'relative'
+            }}
+            onClick={store.toggleSearchShield}
+          >
+            <Shield size={16} />
+            {store.searchShieldEnabled && (
+              <span style={{
+                position: 'absolute',
+                top: 4,
+                right: 4,
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                backgroundColor: '#2ec4b6',
+                boxShadow: '0 0 8px #2ec4b6'
+              }} />
+            )}
+          </button>
 
           {/* Reading mode controls */}
           <button

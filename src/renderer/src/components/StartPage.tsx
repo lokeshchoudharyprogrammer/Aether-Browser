@@ -43,13 +43,15 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
     const handler = setTimeout(async () => {
       try {
         if (window.api && typeof window.api.getSearchSuggestions === 'function') {
-          const res = await window.api.getSearchSuggestions(trimmed)
+          const res = await window.api.getSearchSuggestions(trimmed, store.searchShieldEnabled)
           setSuggestions((res || []).slice(0, 5))
         } else {
           // Stale process fallback: log warning and try renderer fetch
           console.warn('window.api.getSearchSuggestions is not defined. Please restart your dev server!')
           const response = await fetch(
-            `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(trimmed)}`
+            store.searchShieldEnabled
+              ? `https://ac.duckduckgo.com/ac/?q=${encodeURIComponent(trimmed)}&type=list`
+              : `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(trimmed)}`
           )
           if (response.ok) {
             const data = await response.json()
@@ -253,7 +255,9 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
         destination = 'https://' + trimmed
       } else {
         if (searchEngine === 'google') {
-          destination = 'https://www.google.com/search?q=' + encodeURIComponent(trimmed)
+          destination = store.searchShieldEnabled
+            ? 'https://www.startpage.com/sp/search?query=' + encodeURIComponent(trimmed)
+            : 'https://www.google.com/search?q=' + encodeURIComponent(trimmed)
         } else if (searchEngine === 'duckduckgo') {
           destination = 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed)
         } else {
@@ -287,7 +291,9 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
               destination = 'https://' + trimmed
             } else {
               if (searchEngine === 'google') {
-                destination = 'https://www.google.com/search?q=' + encodeURIComponent(trimmed)
+                destination = store.searchShieldEnabled
+                  ? 'https://www.startpage.com/sp/search?query=' + encodeURIComponent(trimmed)
+                  : 'https://www.google.com/search?q=' + encodeURIComponent(trimmed)
               } else if (searchEngine === 'duckduckgo') {
                 destination = 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed)
               } else {
@@ -744,7 +750,9 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
                             destination = 'https://' + trimmed
                           } else {
                             if (searchEngine === 'google') {
-                              destination = 'https://www.google.com/search?q=' + encodeURIComponent(trimmed)
+                              destination = store.searchShieldEnabled
+                                ? 'https://www.startpage.com/sp/search?query=' + encodeURIComponent(trimmed)
+                                : 'https://www.google.com/search?q=' + encodeURIComponent(trimmed)
                             } else if (searchEngine === 'duckduckgo') {
                               destination = 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed)
                             } else {
@@ -825,6 +833,30 @@ export const StartPage: React.FC<StartPageProps> = ({ tabId }) => {
               </div>
             )}
           </div>
+
+          {/* Search Shield toggle */}
+          <button
+            type="button"
+            title={store.searchShieldEnabled ? "Search Shield: ACTIVE (Search anonymous)" : "Search Shield: INACTIVE"}
+            onClick={store.toggleSearchShield}
+            style={{
+              height: 44,
+              padding: '0 16px',
+              borderRadius: 'var(--border-radius-sm)',
+              backgroundColor: store.searchShieldEnabled ? 'rgba(46, 196, 182, 0.12)' : 'var(--bg-secondary)',
+              border: store.searchShieldEnabled ? '1px solid #2ec4b6' : '1px solid var(--border-color)',
+              color: store.searchShieldEnabled ? '#2ec4b6' : 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              gap: 6
+            }}
+          >
+            <Shield size={16} />
+            <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>SHIELD</span>
+          </button>
         </form>
       </div>
 

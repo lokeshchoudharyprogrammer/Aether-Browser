@@ -32,7 +32,7 @@ export interface IApi {
   resumeDownload: (id: string) => void
   triggerDownload: (url: string, profileId: string) => void
   onShortcut: (channel: string, callback: (event: any, ...args: any[]) => void) => () => void
-  getSearchSuggestions: (query: string) => Promise<string[]>
+  getSearchSuggestions: (query: string, shield?: boolean) => Promise<string[]>
 }
 
 declare global {
