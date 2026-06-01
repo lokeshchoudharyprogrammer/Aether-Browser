@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain, session, Menu } from 'electron'
 import { join } from 'path'
 import { readFileSync, existsSync } from 'fs'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { electronApp, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { getDb, saveDb, hashText, encryptPassword, decryptPassword } from './db'
 
@@ -419,8 +419,34 @@ app.whenReady().then(() => {
   // Load real EasyList blocklist before any sessions start
   loadBlocklist()
 
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
+  app.on('web-contents-created', (_, webContents) => {
+    webContents.on('before-input-event', (event, input) => {
+      if (input.type !== 'keyDown') return
+
+      const isMod = input.meta || input.control
+
+      // 1. Force reload: CmdOrCtrl+Shift+R
+      if (isMod && input.shift && input.key.toLowerCase() === 'r') {
+        event.preventDefault()
+        if (webContents.getType() === 'webview') {
+          webContents.reloadIgnoringCache()
+        } else {
+          mainWindow?.webContents.send('shortcut-forcereload-tab')
+        }
+        return
+      }
+
+      // 2. Standard reload: CmdOrCtrl+R or F5
+      if ((isMod && input.key.toLowerCase() === 'r') || input.key === 'F5') {
+        event.preventDefault()
+        if (webContents.getType() === 'webview') {
+          webContents.reload()
+        } else {
+          mainWindow?.webContents.send('shortcut-reload-tab')
+        }
+        return
+      }
+    })
   })
 
   // IPC Database operations
