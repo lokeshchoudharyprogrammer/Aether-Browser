@@ -330,7 +330,7 @@ function App(): React.JSX.Element {
 
           const webview = webviewRefs.current[activeTabId || '']
           if (webview) {
-            webview.src = url
+            webview.loadURL(url).catch(() => {})
           }
           setShowTopSuggestions(false)
         }
@@ -905,7 +905,7 @@ function App(): React.JSX.Element {
 
     const webview = webviewRefs.current[activeTabId || '']
     if (webview) {
-      webview.src = url
+      webview.loadURL(url).catch(() => {})
     }
   }
 
@@ -1638,7 +1638,7 @@ function App(): React.JSX.Element {
                         setAddressInput(url)
                         const webview = webviewRefs.current[activeTabId || '']
                         if (webview) {
-                          webview.src = url
+                          webview.loadURL(url).catch(() => {})
                         }
                         setShowTopSuggestions(false)
                       }}
