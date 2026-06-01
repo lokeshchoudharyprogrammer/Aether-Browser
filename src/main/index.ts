@@ -275,8 +275,20 @@ function createAppMenu(): void {
     {
       label: 'View',
       submenu: [
-        { role: 'reload' },
-        { role: 'forceReload' },
+        {
+          label: 'Reload Active Tab',
+          accelerator: 'CmdOrCtrl+R',
+          click: () => {
+            mainWindow?.webContents.send('shortcut-reload-tab')
+          }
+        },
+        {
+          label: 'Force Reload Active Tab',
+          accelerator: 'CmdOrCtrl+Shift+R',
+          click: () => {
+            mainWindow?.webContents.send('shortcut-forcereload-tab')
+          }
+        },
         { role: 'toggleDevTools' },
         { type: 'separator' },
         {

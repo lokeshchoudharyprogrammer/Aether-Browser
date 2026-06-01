@@ -76,14 +76,15 @@ graph TD
 
 ### Core Shortcuts Mapping Table
 
-| Action                | Accelerator Key (macOS) | Accelerator Key (Win/Linux) | Channel triggered              |
-| :-------------------- | :---------------------- | :-------------------------- | :----------------------------- |
-| **New Tab**           | `Cmd+T`                 | `Ctrl+T`                    | `toRenderer:new-tab`           |
-| **Close Tab**         | `Cmd+W`                 | `Ctrl+W`                    | `toRenderer:close-active-tab`  |
-| **Reopen Closed Tab** | `Cmd+Shift+T`           | `Ctrl+Shift+T`              | `toRenderer:reopen-closed-tab` |
-| **New Window**        | `Cmd+N`                 | `Ctrl+N`                    | `toMain:create-new-window`     |
-| **Reload Page**       | `Cmd+R`                 | `Ctrl+R`                    | `toRenderer:reload-page`       |
-| **Focus Address Bar** | `Cmd+L`                 | `Ctrl+L`                    | `toRenderer:focus-address-bar` |
+| Action                  | Accelerator Key (macOS) | Accelerator Key (Win/Linux) | Channel triggered            |
+| :---------------------- | :---------------------- | :-------------------------- | :--------------------------- |
+| **New Tab**             | `Cmd+T`                 | `Ctrl+T`                    | `shortcut-new-tab`           |
+| **Close Tab**           | `Cmd+W`                 | `Ctrl+W`                    | `shortcut-close-tab`          |
+| **Focus Address Bar**   | `Cmd+L`                 | `Ctrl+L`                    | `shortcut-focus-address`     |
+| **Reload Active Tab**   | `Cmd+R`                 | `Ctrl+R`                    | `shortcut-reload-tab`        |
+| **Force Reload Active** | `Cmd+Shift+R`           | `Ctrl+Shift+R`              | `shortcut-forcereload-tab`   |
+| **Lock Active Profile** | `Cmd+Shift+P`           | `Ctrl+Shift+P`              | `shortcut-lock-profile`      |
+| **Toggle Sidebar Panel**| `Cmd+B`                 | `Ctrl+B`                    | `shortcut-toggle-sidebar`    |
 
 ---
 

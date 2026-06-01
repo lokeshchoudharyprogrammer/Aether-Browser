@@ -621,9 +621,39 @@ function App(): React.JSX.Element {
       setSidebarTab(activeSidebarTab === 'notes' ? 'none' : 'notes')
     })
 
+    // 12. Reload Tab
+    const cleanReloadTab = window.api.onShortcut('shortcut-reload-tab', () => {
+      handleReload()
+    })
+
+    // 13. Force Reload Tab
+    const cleanForceReloadTab = window.api.onShortcut('shortcut-forcereload-tab', () => {
+      const webview = webviewRefs.current[activeTabId || '']
+      if (webview) {
+        webview.reloadIgnoringCache()
+      }
+    })
+
     // Local keydown listener for the chrome frame
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey
+
+      // Force Reload: Ctrl/Cmd + Shift + R
+      if (isMod && e.shiftKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault()
+        const webview = webviewRefs.current[activeTabId || '']
+        if (webview) {
+          webview.reloadIgnoringCache()
+        }
+        return
+      }
+
+      // Reload: Ctrl/Cmd + R or F5
+      if ((isMod && e.key.toLowerCase() === 'r') || e.key === 'F5') {
+        e.preventDefault()
+        handleReload()
+        return
+      }
 
       // Lock Profile: Ctrl/Cmd + K
       if (isMod && e.key.toLowerCase() === 'k') {
@@ -770,6 +800,8 @@ function App(): React.JSX.Element {
       cleanZoomReset()
       cleanNewPrivate()
       cleanToggleNotes()
+      cleanReloadTab()
+      cleanForceReloadTab()
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [
